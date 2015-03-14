@@ -1,0 +1,116 @@
+# File name: notegame.kv
+#:kivy 1.8.0
+
+<RootWidget>:
+	canvas.before:
+		Rectangle:
+			source: 'woodgrain.jpg'
+			pos: self.pos
+			size: self.size
+
+	SplitPanes:
+		orientation: 'horizontal'
+		NoteMatrixFundFloat:
+			width: self.parent.width
+			canvas.before:
+				Color: 
+					rgba: 0.972, 0.9, 0.539, .5
+				BorderImage:
+					border: 20,20,20,20
+					source: 'ball.png'
+					size: self.size
+					pos: self.pos
+			FundStencil:
+				FundFloat:
+					width: self.parent.width
+					FundScatterPlane:
+						id: fundscatterplane
+						do_rotation: False
+						size: self.parent.size
+						FundMatrix:
+#							width: self.parent.width
+		NoteMatrixMelodyFloat:
+			canvas:
+				Color: 
+					rgba: 0.972, 0.9, 0.539, 0.5
+				BorderImage:
+					border: 20,20,20,20
+					source: 'ball.png'
+					size: self.size
+					pos: self.pos
+			MelodyStencil:
+				pos_hint: {'x': 0, 'y': 0}
+				MelodyFloat:
+					pos: self.parent.pos
+					size: self.parent.size
+					MelodyRelative:
+						pos: self.parent.pos
+						size: self.parent.size
+						MelodyScatter:
+							id: melodyscatter
+							do_rotation: False
+							MelodyMatrix:
+#								width: self.parent.parent.parent.parent.parent.width
+#								size: [200,200]
+#								canvas.after:
+#									Color:
+#										rgba: 0, 0, 1, .5
+#									Rectangle:
+#										pos: self.parent.pos
+#										size: self.parent.size
+
+
+
+	AnchorLayout:
+		anchor_x: 'left'
+		anchor_y: 'top'
+		Button:
+			size_hint: .037, .055
+			border: [0,0,0,0]
+			background_color: [1,.91,.43,1]
+			background_normal: 'gear.png'
+			background_down: 'gear.png'
+			on_release: app.open_settings()
+
+	AnchorLayout:
+		anchor_x: 'right'
+		anchor_y: 'top'
+		ToggleButton:
+			size_hint: .04, .06
+			border: [0,0,0,0]
+			background_color: [1,1,1,.9]
+			background_normal: 'lock_open.png'
+			background_down: 'lock_closed.png'
+			on_release: melodyscatter.lock(self.state)
+			on_release: fundscatterplane.lock(self.state)
+
+<NotePoint>:
+	canvas:
+		Color:
+			rgba: self.color
+		Ellipse:
+			source: 'ball.png'
+			pos: self.pos
+			size: self.size         
+			on_touch_down: self.on_touch_down
+	NotePointLabel:
+
+<FlashSpot>:
+	canvas.before:
+		Color:
+			rgba: 1,1,1,.4
+		Ellipse:
+			pos: self.pos
+			size: [self.size[0]+10, self.size[1]+10]
+
+
+#reference defs
+<SplitPanes@BoxLayout>
+<NoteMatrixFundFloat@FloatLayout>
+<FundStencil@StencilView>
+<FundFloat@FloatLayout>
+#<FundScatterPlane@ScatterPlane>
+<NoteMatrixMelodyFloat@FloatLayout>
+<MelodyStencil@StencilView>
+<MelodyFloat@FloatLayout>
+<MelodyRelative@RelativeLayout>
