@@ -4,7 +4,7 @@
 <RootWidget>:
 	canvas.before:
 		Rectangle:
-			source: 'woodgrain.jpg'
+			source: 'images/woodgrain.jpg'
 			pos: self.pos
 			size: self.size
 
@@ -17,7 +17,7 @@
 					rgba: 0.972, 0.9, 0.539, .5
 				BorderImage:
 					border: 20,20,20,20
-					source: 'ball.png'
+					source: 'images/ball.png'
 					size: self.size
 					pos: self.pos
 			FundStencil:
@@ -35,7 +35,7 @@
 					rgba: 0.972, 0.9, 0.539, 0.5
 				BorderImage:
 					border: 20,20,20,20
-					source: 'ball.png'
+					source: 'images/ball.png'
 					size: self.size
 					pos: self.pos
 			MelodyStencil:
@@ -68,8 +68,8 @@
 			size_hint: .037, .055
 			border: [0,0,0,0]
 			background_color: [1,.91,.43,1]
-			background_normal: 'gear.png'
-			background_down: 'gear.png'
+			background_normal: 'images/gear.png'
+			background_down: 'images/gear.png'
 			on_release: app.open_settings()
 
 	AnchorLayout:
@@ -79,8 +79,8 @@
 			size_hint: .04, .06
 			border: [0,0,0,0]
 			background_color: [1,1,1,.9]
-			background_normal: 'lock_open.png'
-			background_down: 'lock_closed.png'
+			background_normal: 'images/lock_open.png'
+			background_down: 'images/lock_closed.png'
 			on_release: melodyscatter.lock(self.state)
 			on_release: fundscatterplane.lock(self.state)
 
@@ -89,7 +89,7 @@
 		Color:
 			rgba: self.color
 		Ellipse:
-			source: 'ball.png'
+			source: 'images/ball.png'
 			pos: self.pos
 			size: self.size         
 			on_touch_down: self.on_touch_down
