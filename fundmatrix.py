@@ -54,7 +54,7 @@ class FundMatrix(RelativeLayout):
 	def make_grid_on_start(self, *args):
 		self.root_note = NotePoint()
  		self.root_note.text = self.key
-		self.root_note.pos = [100,100]
+		self.root_note.center = [100,100]
 		self.root_note.ratio = 1
 		self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
 		NotePoint.GiveNotePointLabel(self.root_note)

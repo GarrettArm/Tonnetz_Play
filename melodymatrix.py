@@ -48,7 +48,7 @@ class MelodyMatrix(RelativeLayout):
 			if i[0] == 'octaves_down':
 				self.octaves_down = int(i[1])
 
-	def redraw_layout(self, **kwargs):
+	def redraw_layout(self):
 		self.clear_widgets() 					#removes NotePoints & Lines
 		self.ratios_set = set()					#resets the reference sets
 		self.first_octave = set()	
@@ -56,16 +56,12 @@ class MelodyMatrix(RelativeLayout):
 		for i in self.canvas.before.children:	#removes Lines
 			if 'Line object' in str(i):
 				self.canvas.before.remove(i)
-		self.make_grid_on_start(kwargs)
+		self.make_grid_on_start()
 
-	def make_grid_on_start(self, *kwargs):
+	def make_grid_on_start(self):
 		self.root_note = NotePoint()
 		self.root_note.text = self.key
-		if kwargs:			
-			for i in kwargs:
-				if 'notetext' in i.keys():
-					self.root_note.text = i['notetext']
-		self.root_note.pos = [200,200]
+		self.root_note.center = [200,200]
 		self.root_note.ratio = 1
 		self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
 		NotePoint.GiveNotePointLabel(self.root_note)
@@ -85,7 +81,6 @@ class MelodyMatrix(RelativeLayout):
 	
 			if i.ratio == 1:
 				i.animate()
-#				i.do_flashspot()
 		
 	def make_first_octave(self, *args):
 		if self.scale == 'Major':

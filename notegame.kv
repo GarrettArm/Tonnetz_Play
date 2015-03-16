@@ -28,7 +28,6 @@
 						do_rotation: False
 						size: self.parent.size
 						FundMatrix:
-#							width: self.parent.width
 		NoteMatrixMelodyFloat:
 			canvas:
 				Color: 
@@ -50,22 +49,11 @@
 							id: melodyscatter
 							do_rotation: False
 							MelodyMatrix:
-#								width: self.parent.parent.parent.parent.parent.width
-#								size: [200,200]
-#								canvas.after:
-#									Color:
-#										rgba: 0, 0, 1, .5
-#									Rectangle:
-#										pos: self.parent.pos
-#										size: self.parent.size
-
-
-
 	AnchorLayout:
 		anchor_x: 'left'
 		anchor_y: 'top'
 		Button:
-			size_hint: .037, .055
+			size_hint: .037, .05
 			border: [0,0,0,0]
 			background_color: [1,.91,.43,1]
 			background_normal: 'images/gear.png'
@@ -76,7 +64,7 @@
 		anchor_x: 'right'
 		anchor_y: 'top'
 		ToggleButton:
-			size_hint: .04, .06
+			size_hint: .04, .05
 			border: [0,0,0,0]
 			background_color: [1,1,1,.9]
 			background_normal: 'images/lock_open.png'
@@ -95,21 +83,12 @@
 			on_touch_down: self.on_touch_down
 	NotePointLabel:
 
-<FlashSpot>:
-	canvas.before:
-		Color:
-			rgba: 1,1,1,.4
-		Ellipse:
-			pos: self.pos
-			size: [self.size[0]+10, self.size[1]+10]
-
 
 #reference defs
 <SplitPanes@BoxLayout>
 <NoteMatrixFundFloat@FloatLayout>
 <FundStencil@StencilView>
 <FundFloat@FloatLayout>
-#<FundScatterPlane@ScatterPlane>
 <NoteMatrixMelodyFloat@FloatLayout>
 <MelodyStencil@StencilView>
 <MelodyFloat@FloatLayout>

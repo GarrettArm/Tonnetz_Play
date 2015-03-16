@@ -10,10 +10,16 @@ from kivy.core.window import Window
 from kivy.config import ConfigParser
 from kivy.uix.scatter import Scatter
 from kivy.uix.scatter import ScatterPlane
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import SlideTransition
 
 from melodymatrix import MelodyMatrix
 from fundmatrix import FundMatrix
 from settingsjson import general_settings_json, fund_settings_json, melody_settings_json
+
+
+class Tutorial(Screen):
+	pass
 
 class FundScatterPlane(ScatterPlane):
 	def __init__(self, **kwargs):

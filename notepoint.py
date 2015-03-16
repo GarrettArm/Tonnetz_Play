@@ -12,7 +12,6 @@ from kivy.core.audio import SoundLoader
 from kivy.properties import ListProperty
 
 
-
 class NotePointLabel(Label):
 	def __init__(self, **kwargs):
 		super(NotePointLabel, self).__init__(**kwargs)
@@ -43,10 +42,8 @@ class NotePoint(Widget):
 		l.font_size = 22
 		self.add_widget(l)
 
-
 	def find_layouts(self):
 		running_app = App.get_running_app().root.children
-		
 		for a in running_app:
 			for b in a.children:
 				for c in b.children:
@@ -61,13 +58,6 @@ class NotePoint(Widget):
 									if "MelodyMatrix" in g_name:
 										self.link_to_melodymatrix = g
 
-	def do_flashspot(self):
-			flash = FlashSpot()
-			flash.size = self.size
-			flash.pos = self.pos
-			self.parent.add_widget(flash)
-			flash.animate()
-
 	def on_touch_down(self, touch):
 		if self.link_to_fundmatrix:
 			if self.link_to_melodymatrix:
@@ -76,8 +66,6 @@ class NotePoint(Widget):
 			self.find_layouts()
 
 		if self.collide_point(*touch.pos):
-			self.do_flashspot()
-
 			if 'fundmatrix' in str(type(self.parent)):
 				self.link_to_melodymatrix.current_fund_relations = self.relations
 				self.link_to_melodymatrix.passed_fund_text = self.text
@@ -95,9 +83,17 @@ class NotePoint(Widget):
 		#it's probably possible to use partials to eliminate the reset_anim def.  i suck at partials though.
 		if not self.pressed:
 			self.pressed = True
-			anim_in = Animation(color=(0,0,0,1), size=(self.size[0]*1.25,self.size[1]*1.25), t='out_elastic', d=0.02) + Animation(color=self.color, size=(self.size[0],self.size[1]), t='in_circ', d=0.02)
+			print 'pos before is:', self.pos
+			self.move_down = [self.center_x - 2, self.center_y - 2]
+			print 'pos after is:', self.center
+			print 'move_down is:', self.move_down
+
+			self.move_back = [self.x, self.y]
+			print 'move back is:', self.move_back
+			anim_in = Animation(center=self.move_down, color=(0,0,0,1), size=(self.size[0]*1.25,self.size[1]*1.25),  d=0.02) + Animation(pos=self.move_back, color=self.color, size=(self.size[0],self.size[1]),  d=0.02)
 			anim_in.bind(on_complete=self.reset_anim)
 			anim_in.start(self)
+			print 'pos way after is:', self.center
 
 
 	def reset_anim(self, *args):
@@ -168,7 +164,7 @@ class NotePoint(Widget):
 
 	def make_up_fifth(self, root_note, *args):
 		new_note = NotePoint()
-		new_note.pos = [self.x+38, self.y+58.3]
+		new_note.center = [self.center_x+38, self.center_y+58.3]
 		new_note.ratio = self.ratio * 1.5
 		new_note.relations = dict(self.relations)
 		new_note.relations['fifth'] += 1
@@ -182,7 +178,7 @@ class NotePoint(Widget):
 
 	def make_down_fifth(self, root_note, *args):
 		new_note = NotePoint()
-		new_note.pos = [self.x-38, self.y-58.3]
+		new_note.center = [self.center_x-38, self.center_y-58.3]
 		new_note.ratio = self.ratio * 2.0 / 3
 		new_note.relations = dict(self.relations)
 		new_note.relations['fifth'] -= 1
@@ -193,7 +189,7 @@ class NotePoint(Widget):
 
 	def make_maj_third_up(self, root_note, *args):
 		new_note = NotePoint()
-		new_note.pos = [self.x-105, self.y+33.3]
+		new_note.center = [self.center_x-105, self.center_y+33.3]
 		new_note.ratio = self.ratio * 1.25
 		new_note.relations = dict(self.relations)
 		new_note.relations['third'] += 1
@@ -209,7 +205,7 @@ class NotePoint(Widget):
 
 	def make_maj_third_down(self, root_note, *args):
 		new_note = NotePoint()
-		new_note.pos = [self.x+105, self.y-33.3]
+		new_note.center = [self.center_x+105, self.center_y-33.3]
 		new_note.ratio = self.ratio * 0.8
 		new_note.relations = dict(self.relations)
 		new_note.relations['third'] -= 1
@@ -222,7 +218,7 @@ class NotePoint(Widget):
 
 	def make_octave_up(self, root_note, *args):
 		new_note = NotePoint()
-		new_note.pos = [self.x, self.y+100]
+		new_note.center = [self.center_x, self.center_y+100]
 		new_note.ratio = self.ratio * 2.0
 		new_note.relations = dict(self.relations)
 		new_note.relations['octave'] += 1
@@ -234,7 +230,7 @@ class NotePoint(Widget):
 
 	def make_octave_down(self, root_note, *args):
 		new_note = NotePoint()
-		new_note.pos = [self.x, self.y-100]
+		new_note.center = [self.center_x, self.center_y-100]
 		new_note.ratio = self.ratio / 2.0
 		new_note.relations = dict(self.relations)
 		new_note.relations['octave'] -= 1

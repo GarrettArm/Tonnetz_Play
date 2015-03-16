@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = Step24Built
+title = Step25Built
 
 # (str) Package name
-package.name = step24built
+package.name = step25built
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.test
