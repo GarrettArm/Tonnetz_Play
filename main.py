@@ -10,8 +10,7 @@ from kivy.core.window import Window
 from kivy.config import ConfigParser
 from kivy.uix.scatter import Scatter
 from kivy.uix.scatter import ScatterPlane
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.screenmanager import SlideTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 
 from melodymatrix import MelodyMatrix
 from fundmatrix import FundMatrix
@@ -100,29 +99,15 @@ class NoteGameApp(App):
 
 	#executes the config changes
 	def on_config_change(self, config, section, key, value):
-		#this is an overwrought way to find the instances of MelodyMatrix & FundMatrix amongst the nested instances.
 		if self.link_to_fundmatrix:
 			if self.link_to_melodymatrix:
 				pass
 		else:
-			for a in self.root.children:
-				for b in a.children:
-					for c in b.children:
-						for d in c.children:
-							for e in d.children:
-								for f in e.children:
-									f_name = str(type(f))
-									if "FundMatrix" in f_name:
-										self.link_to_fundmatrix = f
-									for g in f.children:
-										g_name = str(type(g))
-										if "MelodyMatrix" in g_name:
-											self.link_to_melodymatrix = g
-
-		for i in self.link_to_fundmatrix.children:
-			i.find_layouts()
-		for i in self.link_to_melodymatrix.children:
-			i.find_layouts()
+			for widget in self.root.walk():
+				if "FundMatrix" in str(type(widget)):
+					self.link_to_fundmatrix = widget
+				if "MelodyMatrix" in str(type(widget)):
+					self.link_to_melodymatrix = widget
 
 		if section == 'General':		
 			self.link_to_fundmatrix.get_config_variables()

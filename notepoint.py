@@ -7,9 +7,7 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.label import Label
 from kivy.animation import Animation
-from kivy.core.image import Image
 from kivy.core.audio import SoundLoader
-from kivy.properties import ListProperty
 
 
 class NotePointLabel(Label):
@@ -22,18 +20,15 @@ class NotePoint(Widget):
 		self.pressed = False
 		self.size = [50,50]
 		self.color = [0.586, 0.45, 0.265, .9]
-		super(NotePoint, self).__init__(**kwargs)
-
-		self.link_to_fundmatrix = None
 		self.link_to_melodymatrix = None
+		super(NotePoint, self).__init__(**kwargs)
 
 	fifths_cycle = ['C','G','D','A','E','B','F#','C#','G#','D#','A#','F']
 	maj_thirds_cycle = [['C','E','G#'],['D#','G','B'],['D','F#','A#'],['C#','F', 'A']]
 	scale = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
-	link_to_fundmatrix = ''
-	link_to_melodymatrix = ''
 
 	def GiveNotePointLabel(self, *args):
+		#each notepoint gets a letter
 		l = NotePointLabel()
 		l.color = [1,.89,.355,1]
 		l.size = self.size
@@ -42,31 +37,18 @@ class NotePoint(Widget):
 		l.font_size = 22
 		self.add_widget(l)
 
-	def find_layouts(self):
-		running_app = App.get_running_app().root.children
-		for a in running_app:
-			for b in a.children:
-				for c in b.children:
-					for d in c.children:
-						for e in d.children:
-							for f in e.children:
-								f_name = str(type(f))
-								if "FundMatrix" in f_name:
-									self.link_to_fundmatrix = f
-								for g in f.children:
-									g_name = str(type(g))
-									if "MelodyMatrix" in g_name:
-										self.link_to_melodymatrix = g
-
 	def on_touch_down(self, touch):
-		if self.link_to_fundmatrix:
-			if self.link_to_melodymatrix:
-				pass
-		else:
-			self.find_layouts()
-
 		if self.collide_point(*touch.pos):
+			#check if layout linked already, otherwise find & link it.
 			if 'fundmatrix' in str(type(self.parent)):
+				if self.link_to_melodymatrix:
+					pass
+				else:
+					running_app = App.get_running_app()
+					for widget in running_app.root.walk():
+						if "MelodyMatrix" in str(type(widget)):
+							self.link_to_melodymatrix = widget
+			#run on_touch_down actions
 				self.link_to_melodymatrix.current_fund_relations = self.relations
 				self.link_to_melodymatrix.passed_fund_text = self.text
 				self.link_to_melodymatrix.rename_child_notepoints()
@@ -77,24 +59,16 @@ class NotePoint(Widget):
 				self.animate()
 				return super(NotePoint, self).on_touch_down(touch)
 
-	
 	def animate(self):
 		#if clause and on_complete necessary, else animation bugs & grows with each doubleclick.
 		#it's probably possible to use partials to eliminate the reset_anim def.  i suck at partials though.
 		if not self.pressed:
 			self.pressed = True
-			print 'pos before is:', self.pos
 			self.move_down = [self.center_x - 2, self.center_y - 2]
-			print 'pos after is:', self.center
-			print 'move_down is:', self.move_down
-
-			self.move_back = [self.x, self.y]
-			print 'move back is:', self.move_back
-			anim_in = Animation(center=self.move_down, color=(0,0,0,1), size=(self.size[0]*1.25,self.size[1]*1.25),  d=0.02) + Animation(pos=self.move_back, color=self.color, size=(self.size[0],self.size[1]),  d=0.02)
+			self.move_home = [self.x, self.y]
+			anim_in = Animation(center=self.move_down, color=(0,0,0,1), size=(self.size[0]*1.25,self.size[1]*1.25),  d=0.02) + Animation(pos=self.move_home, color=self.color, size=(self.size[0],self.size[1]),  d=0.02)
 			anim_in.bind(on_complete=self.reset_anim)
 			anim_in.start(self)
-			print 'pos way after is:', self.center
-
 
 	def reset_anim(self, *args):
 		self.pressed = False
@@ -239,27 +213,3 @@ class NotePoint(Widget):
 		new_note.GiveNotePointLabel()
 		self.parent.ratios_set.add(new_note.ratio)
 		self.parent.next_octave.add(new_note)
-
-class FlashSpot(Widget):
-	def __init__(self, **kwargs):
-		self.pressed = False
-		self.color = [1,1,1,.1]
-		super(FlashSpot, self).__init__(**kwargs)
-
-	def animate(self):
-		#if clause and on_complete necessary, else animation bugs & grows with each doubleclick.
-		#it's probably possible to use partials to eliminate the reset_anim def.  i suck at partials though.
-		if not self.pressed:
-			self.pressed = True
-			anim_in = Animation(size=(self.size[0]*1.25,self.size[1]*1.25), t='out_elastic', d=0.02) + Animation(size=(self.size[0],self.size[1]), t='in_circ', d=0.02)
-			anim_in.bind(on_complete=self.complete_anim)			
-			anim_in.start(self)
-
-	def reset_anim(self, *args):
-		self.pressed = False
-
-	def complete_anim(self, animation, widget):
-		widget.reset_anim(widget)
-		widget.parent.remove_widget(widget)
-
-
