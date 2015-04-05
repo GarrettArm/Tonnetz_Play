@@ -14,7 +14,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 
 from melodymatrix import MelodyMatrix
 from fundmatrix import FundMatrix
-from settingsjson import general_settings_json, fund_settings_json, melody_settings_json
+from settingsjson import general_settings_json
 
 
 class Tutorial(Screen):
@@ -86,16 +86,11 @@ class NoteGameApp(App):
 			'thirds_up': 1,
 			'thirds_down': 0,})
 		config.setdefaults('General', {
-			'boolexample': True,
-			'scale': 'Major',
 			'key': 'C',
-			'stringexample': 'some_string',
-			'pathexample': '/'})
+			'scale': 'Major'})
 
 	def build_settings(self, settings):
 		settings.add_json_panel('General Options', self.config, data=general_settings_json)
-		settings.add_json_panel('Fundamental Matrix', self.config, data=fund_settings_json)
-		settings.add_json_panel('Melody Matrix', self.config, data=melody_settings_json)
 
 	#executes the config changes
 	def on_config_change(self, config, section, key, value):

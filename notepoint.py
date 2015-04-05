@@ -39,7 +39,7 @@ class NotePoint(Widget):
 
 	def on_touch_down(self, touch):
 		if self.collide_point(*touch.pos):
-			#check if layout linked already, otherwise find & link it.
+			#check if melodymatrix already linked, otherwise find & link it.
 			if 'fundmatrix' in str(type(self.parent)):
 				if self.link_to_melodymatrix:
 					pass
@@ -74,7 +74,6 @@ class NotePoint(Widget):
 		self.pressed = False
 
 	def SoundPlay(self):
-		#if this math introduces too much lag, we can calculate it once & link a file.wav to each NotePoint instance, then trigger a recalculation each time the key or harmonic note is changed.
 		played_note = str(self.parent.key)
 		played_octave = 4
 		summed_relations = {}
