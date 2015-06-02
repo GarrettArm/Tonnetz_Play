@@ -21,6 +21,8 @@ class NotePoint(Widget):
 		self.size = [50,50]
 		self.color = [0.586, 0.45, 0.265, .9]
 		self.link_to_melodymatrix = None
+		self.tonality = None
+		self.sound = None
 		super(NotePoint, self).__init__(**kwargs)
 
 	fifths_cycle = ['C','G','D','A','E','B','F#','C#','G#','D#','A#','F']
@@ -40,24 +42,75 @@ class NotePoint(Widget):
 	def on_touch_down(self, touch):
 		if self.collide_point(*touch.pos):
 			#check if melodymatrix already linked, otherwise find & link it.
+			#once buildozer is updated to include .walk , use this code:
+			'''
 			if 'fundmatrix' in str(type(self.parent)):
 				if self.link_to_melodymatrix:
 					pass
 				else:
 					running_app = App.get_running_app()
-					for widget in running_app.root.walk():
-						if "MelodyMatrix" in str(type(widget)):
-							self.link_to_melodymatrix = widget
+					for i in running_app.root.walk():
+						if "MelodyMatrix" in str(type(i)):
+							self.link_to_melodymatrix = i'''
+			#until buildozer is updated to include .walk , use this kludge:
+			if 'fundmatrix' in str(type(self.parent)):
+				if self.link_to_melodymatrix:
+					pass
+				else:
+					running_app = App.get_running_app()
+					for a in running_app.root.children:
+						for b in a.children:
+							for c in b.children:
+								for d in c.children:
+									for e in d.children:
+										for f in e.children:
+											for g in f.children:
+												g_name = str(type(g))
+												if "MelodyMatrix" in g_name:
+													self.link_to_melodymatrix = g
+													print 'g is:', g_name
 			#run on_touch_down actions
-				self.link_to_melodymatrix.current_fund_relations = self.relations
 				self.link_to_melodymatrix.passed_fund_text = self.text
+				self.link_to_melodymatrix.current_fund_tonality = self.tonality
+				self.link_to_melodymatrix.current_fund_relations = self.relations				
+				print 'current fund note tonality is:', self.tonality
+				if self.parent.complex == u'0':
+					self.link_to_melodymatrix.redraw_layout()
+
 				self.link_to_melodymatrix.rename_child_notepoints()
-				self.animate()
+
+				self.animate()				
 				return super(NotePoint, self).on_touch_down(touch)
 			elif 'melodymatrix' in str(type(self.parent)):
+				if self.sound:
+					if self.sound.state == 'play':
+						print 'sound not triggered, because sound already playing'
+						return True
 				self.SoundPlay()
 				self.animate()
 				return super(NotePoint, self).on_touch_down(touch)
+
+	def on_touch_up(self, touch):
+		if self.collide_point(*touch.pos):
+			if self.sound:
+				self.sound.stop()
+				return super(NotePoint, self).on_touch_up(touch)
+
+	def on_touch_move(self, touch):
+		if self.collide_point(*touch.pos):
+			if 'fundmatrix' in str(type(self.parent)):
+				return super(NotePoint, self).on_touch_move(touch)
+			else:
+				if self.sound:
+					if self.sound.state == 'play':
+						return super(NotePoint, self).on_touch_move(touch)
+					else:
+						self.SoundPlay()
+						self.animate()
+				else:
+					self.SoundPlay()
+					self.animate()
+			return super(NotePoint, self).on_touch_move(touch)
 
 	def animate(self):
 		#if clause and on_complete necessary, else animation bugs & grows with each doubleclick.
@@ -74,6 +127,11 @@ class NotePoint(Widget):
 		self.pressed = False
 
 	def SoundPlay(self):
+		if self.sound:
+			print 'sound'
+			if self.sound.state == 'play':
+				pass
+				
 		played_note = str(self.parent.key)
 		played_octave = 4
 		summed_relations = {}
@@ -131,9 +189,12 @@ class NotePoint(Widget):
 			played_note = 'C'
 
 		#play the note just calculated
-		soundfile = 'wavs/'+str(played_note)+str(played_octave)+'.wav'
-		sound = SoundLoader.load(soundfile)
-		sound.play()
+		soundfile = 'wavs/test/'+str(played_note)+str(played_octave)+'.wav'
+		self.sound = SoundLoader.load(soundfile)
+		self.sound.loop = True
+		self.sound.play()
+
+	# instructions how to make other notepoints
 
 	def make_up_fifth(self, root_note, *args):
 		new_note = NotePoint()
@@ -196,6 +257,7 @@ class NotePoint(Widget):
 		new_note.relations = dict(self.relations)
 		new_note.relations['octave'] += 1
 		new_note.text = self.text
+		new_note.tonality = self.tonality
 		self.parent.add_widget(new_note)
 		new_note.GiveNotePointLabel()
 		self.parent.ratios_set.add(new_note.ratio)
@@ -208,6 +270,7 @@ class NotePoint(Widget):
 		new_note.relations = dict(self.relations)
 		new_note.relations['octave'] -= 1
 		new_note.text = self.text
+		new_note.tonality = self.tonality
 		self.parent.add_widget(new_note)
 		new_note.GiveNotePointLabel()
 		self.parent.ratios_set.add(new_note.ratio)

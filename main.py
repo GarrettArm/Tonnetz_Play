@@ -17,9 +17,6 @@ from fundmatrix import FundMatrix
 from settingsjson import general_settings_json
 
 
-class Tutorial(Screen):
-	pass
-
 class FundScatterPlane(ScatterPlane):
 	def __init__(self, **kwargs):
 		super(FundScatterPlane, self).__init__(**kwargs)
@@ -75,34 +72,52 @@ class NoteGameApp(App):
 			'octaves_up': 2,
 			'octaves_down': 1,
 			'fifths_up': 2,
-			'fifths_down': 1,
-			'thirds_up': 1,
-			'thirds_down': 0,})
+			'fifths_down': 2,
+			'thirds_up': 2,
+			'thirds_down': 2,})
 		config.setdefaults('Melody', {
 			'octaves_up': 2,
 			'octaves_down': 1,
 			'fifths_up': 2,
 			'fifths_down': 1,
 			'thirds_up': 1,
-			'thirds_down': 0,})
+			'thirds_down': 1,})
 		config.setdefaults('General', {
 			'key': 'C',
-			'scale': 'Major'})
+			'scale': 'Major',
+			'complex': 'False'})
 
 	def build_settings(self, settings):
 		settings.add_json_panel('General Options', self.config, data=general_settings_json)
 
-	#executes the config changes
 	def on_config_change(self, config, section, key, value):
 		if self.link_to_fundmatrix:
 			if self.link_to_melodymatrix:
 				pass
 		else:
-			for widget in self.root.walk():
+			# once buildozer includes .walk , use this code:
+			'''for widget in self.root.walk():
 				if "FundMatrix" in str(type(widget)):
 					self.link_to_fundmatrix = widget
 				if "MelodyMatrix" in str(type(widget)):
-					self.link_to_melodymatrix = widget
+					self.link_to_melodymatrix = widget'''
+			# until buildozer include .walk, use this kludge:
+			running_app = App.get_running_app()
+			for a in running_app.root.children:
+				for b in a.children:
+					for c in b.children:
+						for d in c.children:
+							for e in d.children:
+								for f in e.children:
+									f_name = str(type(f))
+									if "FundMatrix" in f_name:
+										self.link_to_fundmatrix = f
+										print 'f is:', f_name
+									for g in f.children:
+										g_name = str(type(g))
+										if "MelodyMatrix" in g_name:
+											self.link_to_melodymatrix = g
+											print 'g is:', g_name
 
 		if section == 'General':		
 			self.link_to_fundmatrix.get_config_variables()

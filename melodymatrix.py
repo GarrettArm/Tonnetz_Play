@@ -24,6 +24,8 @@ class MelodyMatrix(RelativeLayout):
 	current_fund_relations = {'octave': 0, 'fifth': 0, 'third': 0}
 	current_fund_text = None
 	passed_fund_text = None
+	current_fund_tonality = None
+
 
 	def get_config_variables(self, *args):
 		settings = ConfigParser()	 
@@ -31,6 +33,7 @@ class MelodyMatrix(RelativeLayout):
 		settings.read(current_ini)
 		self.scale = settings.get('General', 'scale')
 		self.key = settings.get('General', 'key')
+		self.complex = settings.get('General', 'complex')
 		self.current_fund_text = str(self.key)
 		self.passed_fund_text = str(self.key)
 		self.settings_list = settings.items('Melody')
@@ -49,6 +52,9 @@ class MelodyMatrix(RelativeLayout):
 				self.octaves_down = int(i[1])
 
 	def redraw_layout(self):
+		for i in self.children:
+			if i.sound:
+				i.sound.stop()
 		self.clear_widgets() 					#removes NotePoints & Lines
 		self.ratios_set = set()					#resets the reference sets
 		self.first_octave = set()	
@@ -64,6 +70,9 @@ class MelodyMatrix(RelativeLayout):
 		self.root_note.center = [200,200]
 		self.root_note.ratio = 1
 		self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
+		if self.scale == 'Major':
+			self.root_note.tonality = 'Major'
+		else: self.root_note.tonality = 'Minor'
 		NotePoint.GiveNotePointLabel(self.root_note)
 		self.add_widget(self.root_note)
 		self.make_first_octave(self.root_note)
@@ -78,48 +87,81 @@ class MelodyMatrix(RelativeLayout):
 				new_position = new_position - 12
 			new_note_name = self.full_scale[new_position]
 			i.children[0].text = new_note_name
-	
+
 			if i.ratio == 1:
 				i.animate()
 		
 	def make_first_octave(self, *args):
-		if self.scale == 'Major':
-			self.execute_add_fifth()
-			self.execute_add_fifth()
-			self.execute_add_down_fifth()
-			self.execute_add_up_third()
-			self.remove_top_third()
-			self.make_next_octaves()
-		if self.scale == 'Minor':
-			self.execute_add_fifth()
-			self.execute_add_fifth()
-			self.execute_add_down_fifth()
-			self.execute_add_down_third()
-			self.remove_bottom_third()
-			self.make_next_octaves()
-		if self.scale == 'Freehand':
-			count = 0
-			while count < self.fifths_up:
+		if self.complex == u'1':        #python2's unicode vs boolean problem
+			#if complex selected, do the normal major/minor layouts
+			print 'complex'
+			if self.scale == 'Major':
+				print 'major'
 				self.execute_add_fifth()
-				count += 1
-			count = 0
-			while count < self.fifths_down:
+				self.execute_add_fifth()
 				self.execute_add_down_fifth()
-				count += 1
-			count = 0
-			while count < self.thirds_up:
 				self.execute_add_up_third()
-				count += 1	
-			count = 0
-			while count < self.thirds_down:
+				self.remove_top_third()
+				self.make_next_octaves()
+			elif self.scale == 'Minor':
+				print 'minor'
+				self.execute_add_fifth()
+				self.execute_add_fifth()
+				self.execute_add_down_fifth()
 				self.execute_add_down_third()
-				count += 1
-			self.make_next_octaves()
-		if self.scale == 'Minimal':
-			pass
+				self.remove_bottom_third()
+				self.make_next_octaves()
+			elif self.scale == 'Freehand':
+				print 'freehand'
+				count = 0
+				while count < self.fifths_up:
+					self.execute_add_fifth()
+					count += 1
+				count = 0
+				while count < self.fifths_down:
+					self.execute_add_down_fifth()
+					count += 1
+				count = 0
+				while count < self.thirds_up:
+					self.execute_add_up_third()
+					count += 1	
+				count = 0
+				while count < self.thirds_down:
+					self.execute_add_down_third()
+					count += 1
+		elif self.complex == u'0':
+			print 'simple'
+			if self.scale == 'Freehand':
+				print 'freehand'
+				count = 0
+				while count < self.fifths_up:
+					self.execute_add_fifth()
+					count += 1
+				count = 0
+				while count < self.fifths_down:
+					self.execute_add_down_fifth()
+					count += 1
+				count = 0
+				while count < self.thirds_up:
+					self.execute_add_up_third()
+					count += 1	
+				count = 0
+				while count < self.thirds_down:
+					self.execute_add_down_third()
+					count += 1
+			else:
+				print 'not freehand'
+				if self.current_fund_tonality == 'Major':
+					print 'major fundamental'
+					self.execute_add_fifth()
+					self.execute_add_up_third()
+					self.remove_top_third()
+				elif self.current_fund_tonality == 'Minor':
+					print 'minor fundamental'
+					self.execute_add_fifth()
+					self.execute_add_down_third()
+					self.remove_bottom_third()
 
-	def minimal_switching(self):
-		pass
 		
 	def remove_top_third(self, *args):
 		for i in self.children:
@@ -227,6 +269,7 @@ class MelodyMatrix(RelativeLayout):
 								Color(0.6,0.6,0.6,1)
 								Line(points=[item_x.center[0], item_x.center[1], item_y.center[0], item_y.center[1]], width=1.25)
 
-	def swap_names_around(self, value):
-		self.key = value
-		self.redraw_layout()
+	def silence(self):
+		for i in self.children:
+			if i.sound:
+				i.sound.stop()

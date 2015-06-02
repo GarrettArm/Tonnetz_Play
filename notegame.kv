@@ -50,7 +50,8 @@
 							id: melodyscatter
 							do_rotation: False
 							MelodyMatrix:
-								id: MelodyMatrix
+								id: melodymatrix
+
 	AnchorLayout:
 		anchor_x: 'left'
 		anchor_y: 'top'
@@ -65,14 +66,23 @@
 	AnchorLayout:
 		anchor_x: 'right'
 		anchor_y: 'top'
-		ToggleButton:
-			size_hint: .04, .05
-			border: [0,0,0,0]
-			background_color: [1,1,1,.9]
-			background_normal: 'images/lock_open.png'
-			background_down: 'images/lock_closed.png'
-			on_release: melodyscatter.lock(self.state)
-			on_release: fundscatterplane.lock(self.state)
+		BoxLayout:
+			pos: self.parent.pos
+			size_hint: .08, .05
+			Button:
+				border: [0,0,0,0]
+				background_color: [1,1,1,.7]
+				background_normal: 'images/stop.png'
+				background_down: 'images/stop.png'
+				on_release: melodymatrix.silence()				
+			ToggleButton:
+				border: [0,0,0,0]
+				background_color: [1,1,1,.9]
+				background_normal: 'images/lock_open.png'
+				background_down: 'images/lock_closed.png'
+				on_release: melodyscatter.lock(self.state)
+				on_release: fundscatterplane.lock(self.state)
+
 
 <NotePoint>:
 	canvas:
@@ -83,6 +93,7 @@
 			pos: self.pos
 			size: self.size         
 			on_touch_down: self.on_touch_down
+			on_touch_up: self.on_touch_up
 	NotePointLabel:
 
 

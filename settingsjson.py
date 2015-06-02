@@ -16,6 +16,12 @@ general_settings_json = json.dumps([
      'key': 'scale',
      'options': ['Major', 'Minor', 'Freehand']},
 
+    {'type': 'bool',
+     'title': 'Complex',
+     'desc': '',
+     'section': 'General',
+     'key': 'complex'},
+
     {'type': 'title',
      'title': 'Left Side'},
 
