@@ -1,6 +1,4 @@
 # File name: fundmatrix.py
-import kivy
-kivy.require('1.8.0')
 
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.graphics import Line, Color

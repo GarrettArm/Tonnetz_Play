@@ -1,7 +1,6 @@
 # File name: notepoint.py
+
 from __future__ import division
-import kivy
-kivy.require('1.8.0')
 
 from kivy.app import App
 from kivy.uix.widget import Widget

@@ -4,7 +4,7 @@
 title = NoteMatrix
 
 # (str) Package name
-package.name = from_git
+package.name = fromgit
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.test
