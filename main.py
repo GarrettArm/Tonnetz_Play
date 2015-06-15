@@ -11,9 +11,11 @@ from kivy.config import ConfigParser
 from kivy.uix.scatter import Scatter
 from kivy.uix.scatter import ScatterPlane
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
+from kivy.uix.popup import Popup
 
 from melodymatrix import MelodyMatrix
 from fundmatrix import FundMatrix
+from startscreen import StartScreen
 from settingsjson import general_settings_json
 
 
@@ -54,6 +56,10 @@ class RootWidget(RelativeLayout):
 		super(RootWidget, self).__init__(**kwargs)
 		self.last_harmony_note = 'C'
 
+	def open_startscreen(self):
+		a = StartScreen()
+		self.add_widget(a)
+
 class NoteGameApp(App):
 	def __init__(self, **kwargs):
 		super(NoteGameApp, self).__init__(**kwargs)
@@ -66,6 +72,7 @@ class NoteGameApp(App):
 		config = self.config
 		return RootWidget()
 
+	
 	#creates a config file if not present
 	def build_config(self, config):
 		config.setdefaults('Fundamental', {
@@ -101,7 +108,8 @@ class NoteGameApp(App):
 					self.link_to_fundmatrix = widget
 				if "MelodyMatrix" in str(type(widget)):
 					self.link_to_melodymatrix = widget'''
-			# until buildozer include .walk, use this kludge:
+
+			# until buildozer includes .walk, use this kludge:
 			running_app = App.get_running_app()
 			for a in running_app.root.children:
 				for b in a.children:

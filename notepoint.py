@@ -67,12 +67,10 @@ class NotePoint(Widget):
 												g_name = str(type(g))
 												if "MelodyMatrix" in g_name:
 													self.link_to_melodymatrix = g
-													print 'g is:', g_name
 			#run on_touch_down actions
 				self.link_to_melodymatrix.passed_fund_text = self.text
 				self.link_to_melodymatrix.current_fund_tonality = self.tonality
-				self.link_to_melodymatrix.current_fund_relations = self.relations				
-				print 'current fund note tonality is:', self.tonality
+				self.link_to_melodymatrix.current_fund_relations = self.relations
 				if self.parent.complex == u'0':
 					self.link_to_melodymatrix.redraw_layout()
 
@@ -83,7 +81,6 @@ class NotePoint(Widget):
 			elif 'melodymatrix' in str(type(self.parent)):
 				if self.sound:
 					if self.sound.state == 'play':
-						print 'sound not triggered, because sound already playing'
 						return True
 				self.SoundPlay()
 				self.animate()
@@ -127,7 +124,6 @@ class NotePoint(Widget):
 
 	def SoundPlay(self):
 		if self.sound:
-			print 'sound'
 			if self.sound.state == 'play':
 				pass
 				

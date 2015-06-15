@@ -30,6 +30,7 @@ class MelodyMatrix(RelativeLayout):
 		current_ini = App.get_running_app().get_application_config()
 		settings.read(current_ini)
 		self.scale = settings.get('General', 'scale')
+		self.current_fund_tonality = self.scale  		# until fund note pressed, melody key is self.scale
 		self.key = settings.get('General', 'key')
 		self.complex = settings.get('General', 'complex')
 		self.current_fund_text = str(self.key)
@@ -49,6 +50,21 @@ class MelodyMatrix(RelativeLayout):
 			if i[0] == 'octaves_down':
 				self.octaves_down = int(i[1])
 
+	def make_grid_on_start(self):
+		self.root_note = NotePoint()
+		self.root_note.text = self.key
+		self.root_note.center = [200,200]
+		self.root_note.ratio = 1
+		self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
+		if self.scale == 'Major':
+			self.root_note.tonality = 'Major'
+		else: 
+			self.root_note.tonality = 'Minor'
+		NotePoint.GiveNotePointLabel(self.root_note)
+		self.add_widget(self.root_note)
+		self.make_first_octave(self.root_note)
+		self.add_lines()
+
 	def redraw_layout(self):
 		for i in self.children:
 			if i.sound:
@@ -62,20 +78,6 @@ class MelodyMatrix(RelativeLayout):
 				self.canvas.before.remove(i)
 		self.make_grid_on_start()
 
-	def make_grid_on_start(self):
-		self.root_note = NotePoint()
-		self.root_note.text = self.key
-		self.root_note.center = [200,200]
-		self.root_note.ratio = 1
-		self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
-		if self.scale == 'Major':
-			self.root_note.tonality = 'Major'
-		else: self.root_note.tonality = 'Minor'
-		NotePoint.GiveNotePointLabel(self.root_note)
-		self.add_widget(self.root_note)
-		self.make_first_octave(self.root_note)
-		self.add_lines()
-
 	def rename_child_notepoints(self):
 		for i in self.children:
 			old_position = self.full_scale.index(i.text)
@@ -86,15 +88,15 @@ class MelodyMatrix(RelativeLayout):
 			new_note_name = self.full_scale[new_position]
 			i.children[0].text = new_note_name
 
-			if i.ratio == 1:
+			if i.ratio == 1:	#animate the root position
 				i.animate()
+
+	### instructions for placing the notepoints
 		
 	def make_first_octave(self, *args):
 		if self.complex == u'1':        #python2's unicode vs boolean problem
 			#if complex selected, do the normal major/minor layouts
-			print 'complex'
 			if self.scale == 'Major':
-				print 'major'
 				self.execute_add_fifth()
 				self.execute_add_fifth()
 				self.execute_add_down_fifth()
@@ -102,7 +104,6 @@ class MelodyMatrix(RelativeLayout):
 				self.remove_top_third()
 				self.make_next_octaves()
 			elif self.scale == 'Minor':
-				print 'minor'
 				self.execute_add_fifth()
 				self.execute_add_fifth()
 				self.execute_add_down_fifth()
@@ -110,7 +111,6 @@ class MelodyMatrix(RelativeLayout):
 				self.remove_bottom_third()
 				self.make_next_octaves()
 			elif self.scale == 'Freehand':
-				print 'freehand'
 				count = 0
 				while count < self.fifths_up:
 					self.execute_add_fifth()
@@ -128,9 +128,7 @@ class MelodyMatrix(RelativeLayout):
 					self.execute_add_down_third()
 					count += 1
 		elif self.complex == u'0':
-			print 'simple'
 			if self.scale == 'Freehand':
-				print 'freehand'
 				count = 0
 				while count < self.fifths_up:
 					self.execute_add_fifth()
@@ -148,14 +146,11 @@ class MelodyMatrix(RelativeLayout):
 					self.execute_add_down_third()
 					count += 1
 			else:
-				print 'not freehand'
 				if self.current_fund_tonality == 'Major':
-					print 'major fundamental'
 					self.execute_add_fifth()
 					self.execute_add_up_third()
 					self.remove_top_third()
 				elif self.current_fund_tonality == 'Minor':
-					print 'minor fundamental'
 					self.execute_add_fifth()
 					self.execute_add_down_third()
 					self.remove_bottom_third()
@@ -252,6 +247,8 @@ class MelodyMatrix(RelativeLayout):
 			if i.ratio*0.5 not in self.ratios_set:
 				i.make_octave_down(self.root_note)	
 
+	#decorations
+
 	def add_lines(self, *args):
 		for item_x in self.children:
 			for item_y in self.children:
@@ -266,6 +263,8 @@ class MelodyMatrix(RelativeLayout):
 							with self.canvas.before:
 								Color(0.6,0.6,0.6,1)
 								Line(points=[item_x.center[0], item_x.center[1], item_y.center[0], item_y.center[1]], width=1.25)
+
+	#misc functions
 
 	def silence(self):
 		for i in self.children:

@@ -40,20 +40,6 @@ class FundMatrix(RelativeLayout):
 			elif i[0] == 'octaves_down':
 				self.octaves_down = int(i[1])
 
-	def make_grid_on_start(self, *args):
-		self.root_note = NotePoint()
- 		self.root_note.text = self.key
-		self.root_note.center = [100,100]
-		self.root_note.ratio = 1
-		self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
-		if self.scale == 'Major':
-			self.root_note.tonality = 'Major'
-		else: self.root_note.tonality = 'Minor'
-		NotePoint.GiveNotePointLabel(self.root_note)
-		self.add_widget(self.root_note)
-		self.make_first_octave(self.root_note)
-		self.add_lines()
-
 	def set_tonality(self):
 		fourth = 2.0/3
 		sixth = fourth*1.25
@@ -71,6 +57,20 @@ class FundMatrix(RelativeLayout):
 				elif i.ratio in [0.8, min_third, 1.8]:
 					i.tonality = 'Major'
 
+	def make_grid_on_start(self, *args):
+		self.root_note = NotePoint()
+ 		self.root_note.text = self.key
+		self.root_note.center = [100,100]
+		self.root_note.ratio = 1
+		self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
+		if self.scale == 'Major':
+			self.root_note.tonality = 'Major'
+		else: self.root_note.tonality = 'Minor'
+		NotePoint.GiveNotePointLabel(self.root_note)
+		self.add_widget(self.root_note)
+		self.make_first_octave(self.root_note)
+		self.add_lines()
+
 	def redraw_layout(self):
 		self.clear_widgets() 					#removes NotePoints
 		self.ratios_set = set()					#resets the reference sets
@@ -80,6 +80,8 @@ class FundMatrix(RelativeLayout):
 			if 'Line object' in str(i):
 				self.canvas.before.remove(i)
 		self.make_grid_on_start()
+
+	### instructions for placing the notepoints
 
 	def make_first_octave(self, *args):
 		if self.scale == 'Major':
@@ -206,6 +208,8 @@ class FundMatrix(RelativeLayout):
 			self.ratios_set.add(i.ratio)
 			if i.ratio*0.5 not in self.ratios_set:
 				i.make_octave_down(self.root_note)
+
+	# decorations
 
 	def add_lines(self, *args):
 		for item_x in self.children:

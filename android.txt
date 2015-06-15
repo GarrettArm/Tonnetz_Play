@@ -1,3 +1,3 @@
-title=notematrix
+title=NoteGame
 author=garrett_armstrong
 orientation=landscape

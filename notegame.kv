@@ -1,5 +1,28 @@
 # File name: notegame.kv
 
+#
+# NoteGame
+# 
+# Copyright (C) 2015  Garrett Armstrong
+# 
+# For comments, suggestions or other messages, contact me at:
+# <garrett.w.armstrong@gmail.com>
+# 
+# This file is part of NoteGame.
+# 
+# NoteGame is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# NoteGame is distributed in the hope that it will be fun,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with NoteGame.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 <RootWidget>:
 	canvas.before:
@@ -55,13 +78,22 @@
 	AnchorLayout:
 		anchor_x: 'left'
 		anchor_y: 'top'
-		Button:
-			size_hint: .037, .05
-			border: [0,0,0,0]
-			background_color: [1,.91,.43,1]
-			background_normal: 'images/gear.png'
-			background_down: 'images/gear.png'
-			on_release: app.open_settings()
+		BoxLayout:
+			pos: self.parent.pos
+			size_hint: .08, .05
+			Button:
+				border: [0,0,0,0]
+				background_color: [1,.91,.43,1]
+				background_normal: 'images/gear.png'
+				background_down: 'images/gear.png'
+				on_release: app.open_settings()
+			Button:
+				border: [0,0,0,0]
+				background_color: [1,.91,.43,1]
+				background_normal: 'images/gear.png'
+				background_down: 'images/gear.png'
+				on_release: root.open_startscreen()
+
 
 	AnchorLayout:
 		anchor_x: 'right'
@@ -84,6 +116,9 @@
 				on_release: fundscatterplane.lock(self.state)
 
 
+	StartScreen:
+
+
 <NotePoint>:
 	canvas:
 		Color:
@@ -96,6 +131,19 @@
 			on_touch_up: self.on_touch_up
 	NotePointLabel:
 
+<StartScreen>:
+	id: startscreen
+	size_hint: 1, 1
+	auto_dismiss: False
+	title: 'NoteGame'
+	on_touch_down: self.parent.parent.on_touch_down
+
+	Label:
+		text_size: self.size
+		halign: 'left'
+		valign: 'top'
+		markup: True
+		text: "[b]Instructions:[/b]\n\nThe Gear icon for Settings.\nThe Question Mark for this screen.\nThe Stop sign to stop all sound.\nThe Lock icon to freeze the notes' position.  Zoom and center the notes, then use it.\n\n[b]Credits[/b]\n\nThanks to David Canright for his Harmonic Melodic Diagrams, which inspired this app.\n\nThanks also to Larry Polansky for his communications regarding seven and higher limit just intonation.  The app supports limits greater than five, which may be implemented when the buildozer API supports the required definitions.\n\nThanks to the Kivy team for creating the API that made this possible.\n\nUntold amounts of thanks offered to all the online question answerers and advice givers.\n\n\nCopyright 2015 Garrett Armstrong.  GNU GPL3 licensed.  Source code available at github.com/GarrettArm"
 
 #reference defs
 <SplitPanes@BoxLayout>
