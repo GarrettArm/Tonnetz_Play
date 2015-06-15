@@ -6,8 +6,4 @@ i can't give advice on installing kivy on osX or Windows.  on linux, i recommend
 
 my app is a simple musical instrument.  any further description is moot, since playing the app should be intuitive (else i've done a poor job).
 
-Acknowledgements:
 
-Dan Cartwright produced a editable set of tonnetz files, which inspired much of my design.
-
-Larry Polansky guided me to studying 7-limit just intonation, which played heavily in the early versions on this app.  Unfortunately, the current kivy API (as of 6-1-2105) does not support the necessary functions in an android or iOS build -- I hope to reintroduce 7-limit and greater limits if supported by future versions of the API.
