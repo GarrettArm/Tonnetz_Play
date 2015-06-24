@@ -67,10 +67,14 @@ class NotePoint(Widget):
 												g_name = str(type(g))
 												if "MelodyMatrix" in g_name:
 													self.link_to_melodymatrix = g
-			#run on_touch_down actions
+				#run on_touch_down actions
 				self.link_to_melodymatrix.passed_fund_text = self.text
+				print self.text
 				self.link_to_melodymatrix.current_fund_tonality = self.tonality
+				print self.tonality
 				self.link_to_melodymatrix.current_fund_relations = self.relations
+				print self.relations
+				print self.parent.complex
 				if self.parent.complex == u'0':
 					self.link_to_melodymatrix.redraw_layout()
 
@@ -184,7 +188,7 @@ class NotePoint(Widget):
 			played_note = 'C'
 
 		#play the note just calculated
-		soundfile = 'wavs/organ/'+str(played_note)+str(played_octave)+'.wav'
+		soundfile = 'wavs/'+str(played_note)+str(played_octave)+'.wav'
 		self.sound = SoundLoader.load(soundfile)
 		self.sound.loop = True
 		self.sound.play()

@@ -12,8 +12,11 @@ from notepoint import NotePoint
 class MelodyMatrix(RelativeLayout):
 	def __init__(self, **kwargs):
 		super(MelodyMatrix, self).__init__(**kwargs)
+		self.scale = 'Major'
+		self.complex = u'0'
 		self.get_config_variables()
 		self.make_grid_on_start()
+		self.redraw_layout()
 
 	full_scale = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
 	ratios_set = set()
@@ -96,7 +99,9 @@ class MelodyMatrix(RelativeLayout):
 	def make_first_octave(self, *args):
 		if self.complex == u'1':        #python2's unicode vs boolean problem
 			#if complex selected, do the normal major/minor layouts
+			print 'u1 caught'
 			if self.scale == 'Major':
+				print 'major caught'
 				self.execute_add_fifth()
 				self.execute_add_fifth()
 				self.execute_add_down_fifth()
@@ -104,6 +109,7 @@ class MelodyMatrix(RelativeLayout):
 				self.remove_top_third()
 				self.make_next_octaves()
 			elif self.scale == 'Minor':
+				print 'minor caught'
 				self.execute_add_fifth()
 				self.execute_add_fifth()
 				self.execute_add_down_fifth()
@@ -111,6 +117,7 @@ class MelodyMatrix(RelativeLayout):
 				self.remove_bottom_third()
 				self.make_next_octaves()
 			elif self.scale == 'Freehand':
+				print 'freehand caught'
 				count = 0
 				while count < self.fifths_up:
 					self.execute_add_fifth()
@@ -128,7 +135,9 @@ class MelodyMatrix(RelativeLayout):
 					self.execute_add_down_third()
 					count += 1
 		elif self.complex == u'0':
+			print 'complex caught'
 			if self.scale == 'Freehand':
+				print 'freehand caught'
 				count = 0
 				while count < self.fifths_up:
 					self.execute_add_fifth()
@@ -147,6 +156,7 @@ class MelodyMatrix(RelativeLayout):
 					count += 1
 			else:
 				if self.current_fund_tonality == 'Major':
+					print 'Major caught'
 					self.execute_add_fifth()
 					self.execute_add_up_third()
 					self.remove_top_third()
@@ -154,6 +164,7 @@ class MelodyMatrix(RelativeLayout):
 					self.octaves_down = 1
 					self.make_next_octaves()
 				elif self.current_fund_tonality == 'Minor':
+					print 'Minor caught'
 					self.execute_add_fifth()
 					self.execute_add_down_third()
 					self.remove_bottom_third()

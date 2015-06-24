@@ -17,6 +17,7 @@ class FundMatrix(RelativeLayout):
 	ratios_set = set()
 	first_octave = set()
 	next_octave = set()
+	first_run = True
 
 	def get_config_variables(self):
 		settings = ConfigParser()

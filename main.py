@@ -92,7 +92,7 @@ class NoteGameApp(App):
 		config.setdefaults('General', {
 			'key': 'C',
 			'scale': 'Major',
-			'complex': 'True'})
+			'complex': u'0'})
 
 	def build_settings(self, settings):
 		settings.add_json_panel('General Options', self.config, data=general_settings_json)
