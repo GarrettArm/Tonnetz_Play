@@ -9,13 +9,7 @@ class StartScreen(Popup):
 		self.background_color = [0,1,0,0.7]
 	
 	def on_touch_down(self, *args, **kwargs):
-		print 'self is:', self
-		print 'self dir is:', dir(self)
-		print self.background_color
-
-
-
-
+		#breakdown startscreen on any touch
 		for i in self.parent.children:
 			if 'startscreen' in str(i):
 				self.parent.remove_widget(i)

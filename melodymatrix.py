@@ -150,10 +150,16 @@ class MelodyMatrix(RelativeLayout):
 					self.execute_add_fifth()
 					self.execute_add_up_third()
 					self.remove_top_third()
+					self.octaves_up = 2			# hack to hardcode two octaves up & one octave down for easymode.
+					self.octaves_down = 1
+					self.make_next_octaves()
 				elif self.current_fund_tonality == 'Minor':
 					self.execute_add_fifth()
 					self.execute_add_down_third()
 					self.remove_bottom_third()
+					self.octaves_up = 2
+					self.octaves_down = 1
+					self.make_next_octaves()
 
 		
 	def remove_top_third(self, *args):

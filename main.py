@@ -120,12 +120,10 @@ class NoteGameApp(App):
 									f_name = str(type(f))
 									if "FundMatrix" in f_name:
 										self.link_to_fundmatrix = f
-										print 'f is:', f_name
 									for g in f.children:
 										g_name = str(type(g))
 										if "MelodyMatrix" in g_name:
 											self.link_to_melodymatrix = g
-											print 'g is:', g_name
 
 		if section == 'General':		
 			self.link_to_fundmatrix.get_config_variables()

@@ -1,7 +1,7 @@
 [app]
 
 # (str) Title of your application
-title = NoteMatrix
+title = Tonnetz Play
 
 # (str) Package name
 package.name = fromgit
@@ -29,7 +29,7 @@ source.include_exts = py,png,jpg,kv,atlas,wav
 # version.filename = %(source.dir)s/main.py
 
 # (str) Application versioning (method 2)
-version = 0.9
+version = 0.94
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
@@ -59,71 +59,71 @@ fullscreen = 1
 # android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 
 # (int) Android API to use
-#android.api = 14
+# android.api = 14
 
 # (int) Minimum API required (8 = Android 2.2 devices)
-#android.minapi = 8
+# android.minapi = 8
 
 # (int) Android SDK version to use
-#android.sdk = 21
+# android.sdk = 21
 
 # (str) Android NDK version to use
-#android.ndk = 9c
+# android.ndk = 9c
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
-#android.private_storage = True
+# android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path =
+# android.ndk_path =
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path =
+# android.sdk_path = 
 
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
-#android.p4a_dir =
+# android.p4a_dir =
 
 # (list) python-for-android whitelist
-#android.p4a_whitelist =
+# android.p4a_whitelist =
 
 # (str) Android entry point, default is ok for Kivy-based app
-#android.entrypoint = org.renpy.android.PythonActivity
+# android.entrypoint = org.renpy.android.PythonActivity
 
 # (list) List of Java .jar files to add to the libs so that pyjnius can access
 # their classes. Don't add jars that you do not need, since extra jars can slow
 # down the build process. Allows wildcards matching, for example:
 # OUYA-ODK/libs/*.jar
-#android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
+# android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-#android.add_src =
+# android.add_src =
 
 # (str) python-for-android branch to use, if not master, useful to try
 # not yet merged features.
-#android.branch = master
+# android.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
-#android.ouya.category = GAME
+# android.ouya.category = GAME
 
 # (str) Filename of OUYA Console icon. It must be a 732x412 png image.
-#android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
+# android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
 
 # (str) XML file to include as an intent filters in <activity> tag
-#android.manifest.intent_filters =
+# android.manifest.intent_filters =
 
 # (list) Android additionnal libraries to copy into libs/armeabi
-#android.add_libs_armeabi = libs/android/*.so
-#android.add_libs_armeabi_v7a = libs/android-v7/*.so
-#android.add_libs_x86 = libs/android-x86/*.so
-#android.add_libs_mips = libs/android-mips/*.so
+# android.add_libs_armeabi = libs/android/*.so
+# android.add_libs_armeabi_v7a = libs/android-v7/*.so
+# android.add_libs_x86 = libs/android-x86/*.so
+# android.add_libs_mips = libs/android-mips/*.so
 
 # (bool) Indicate whether the screen should stay on
 # Don't forget to add the WAKE_LOCK permission if you set this to True
-#android.wakelock = False
+# android.wakelock = False
 
 # (list) Android application meta-data to set (key=value format)
-#android.meta_data =
+# android.meta_data =
 
 # (list) Android library project to add (will be added in the
 # project.properties automatically.)

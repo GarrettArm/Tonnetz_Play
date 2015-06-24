@@ -110,7 +110,7 @@ class NotePoint(Widget):
 
 	def animate(self):
 		#if clause and on_complete necessary, else animation bugs & grows with each doubleclick.
-		#it's probably possible to use partials to eliminate the reset_anim def.  i suck at partials though.
+		#it's probably possible to use partials() to eliminate the reset_anim def.  i suck at partials though.
 		if not self.pressed:
 			self.pressed = True
 			self.move_down = [self.center_x - 2, self.center_y - 2]
@@ -184,7 +184,7 @@ class NotePoint(Widget):
 			played_note = 'C'
 
 		#play the note just calculated
-		soundfile = 'wavs/test/'+str(played_note)+str(played_octave)+'.wav'
+		soundfile = 'wavs/organ/'+str(played_note)+str(played_octave)+'.wav'
 		self.sound = SoundLoader.load(soundfile)
 		self.sound.loop = True
 		self.sound.play()
