@@ -69,12 +69,8 @@ class NotePoint(Widget):
 													self.link_to_melodymatrix = g
 				#run on_touch_down actions
 				self.link_to_melodymatrix.passed_fund_text = self.text
-				print self.text
 				self.link_to_melodymatrix.current_fund_tonality = self.tonality
-				print self.tonality
 				self.link_to_melodymatrix.current_fund_relations = self.relations
-				print self.relations
-				print self.parent.complex
 				if self.parent.complex == u'0':
 					self.link_to_melodymatrix.redraw_layout()
 
@@ -188,6 +184,10 @@ class NotePoint(Widget):
 			played_note = 'C'
 
 		#play the note just calculated
+#		soundfile = 'ogg/G3.ogg'
+#		if building for android or linux use ogg & swap in the ogg folder & out the wav folder
+#		do the opposite if building for iOS
+#		soundfile = 'ogg/'+str(played_note)+str(played_octave)+'.ogg'
 		soundfile = 'wavs/'+str(played_note)+str(played_octave)+'.wav'
 		self.sound = SoundLoader.load(soundfile)
 		self.sound.loop = True
