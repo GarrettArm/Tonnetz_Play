@@ -7,5 +7,3 @@ I can't give advice on installing kivy on osX or Windows.  On linux, there are a
 There's a compiled android apk in the bin/ directory, if you want a shortcut to installing on android.  I purposely didn't give it any access to anything, including contacts, internet, etc.
 
 My app is a simple musical instrument.  Any further description is moot, since playing the app should be intuitive (else i've done a poor job).
-
-

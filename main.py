@@ -60,14 +60,14 @@ class RootWidget(RelativeLayout):
 		a = StartScreen()
 		self.add_widget(a)
 
-class NoteGameApp(App):
+class TonnetzPlayApp(App):
 	def __init__(self, **kwargs):
-		super(NoteGameApp, self).__init__(**kwargs)
+		super(TonnetzPlayApp, self).__init__(**kwargs)
 		self.link_to_fundmatrix = None
 		self.link_to_melodymatrix = None
 
 	def build(self):	
-		self.title = "NoteGame"				#name displayed in menubar
+		self.title = "Tonnetz Play"			#name displayed in menubar
 		self.use_kivy_settings = False		#hide kivy options on settings screen
 		config = self.config
 		return RootWidget()
@@ -141,4 +141,4 @@ class NoteGameApp(App):
 
 
 if __name__ == '__main__':
-	NoteGameApp().run()
+	TonnetzPlayApp().run()

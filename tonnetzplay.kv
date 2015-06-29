@@ -1,0 +1,156 @@
+# File name: tonnetzplay.kv
+
+#
+# TonnetzPlay
+# 
+# Copyright (C) 2015  Garrett Armstrong
+# 
+# For comments, suggestions or other messages, contact me at:
+# <garrett.w.armstrong@gmail.com>
+# 
+# This file is part of TonnetzPlay.
+# 
+# TonnetzPlay is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# TonnetzPlay is distributed in the hope that it will be fun,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with TonnetzPlay.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+<RootWidget>:
+	canvas.before:
+		Rectangle:
+			source: 'images/woodgrain.jpg'
+			pos: self.pos
+			size: self.size
+
+	SplitPanes:
+		orientation: 'horizontal'
+		NoteMatrixFundFloat:
+			width: self.parent.width
+			canvas.before:
+				Color: 
+					rgba: 0.972, 0.9, 0.539, .5
+				BorderImage:
+					border: 20,20,20,20
+					source: 'images/ball.png'
+					size: self.size
+					pos: self.pos
+			FundStencil:
+				FundFloat:
+					width: self.parent.width
+					FundScatterPlane:
+						id: fundscatterplane
+						do_rotation: False
+						size: self.parent.size
+						FundMatrix:
+							id: FundMatrix
+		NoteMatrixMelodyFloat:
+			canvas:
+				Color: 
+					rgba: 0.972, 0.9, 0.539, 0.5
+				BorderImage:
+					border: 20,20,20,20
+					source: 'images/ball.png'
+					size: self.size
+					pos: self.pos
+			MelodyStencil:
+				pos_hint: {'x': 0, 'y': 0}
+				MelodyFloat:
+					pos: self.parent.pos
+					size: self.parent.size
+					MelodyRelative:
+						pos: self.parent.pos
+						size: self.parent.size
+						MelodyScatter:
+							id: melodyscatter
+							do_rotation: False
+							MelodyMatrix:
+								id: melodymatrix
+
+	AnchorLayout:
+		anchor_x: 'left'
+		anchor_y: 'top'
+		BoxLayout:
+			pos: self.parent.pos
+			size_hint: .08, .05
+			Button:
+				border: [0,0,0,0]
+				background_color: [1,.91,.43,1]
+				background_normal: 'images/gear.png'
+				background_down: 'images/gear.png'
+				on_release: app.open_settings()
+			Button:
+				border: [0,0,0,0]
+				background_color: [1,.91,.43,.5]
+				background_normal: 'images/question_mark.png'
+				background_down: 'images/question_mark.png'
+				on_release: root.open_startscreen()
+
+
+	AnchorLayout:
+		anchor_x: 'right'
+		anchor_y: 'top'
+		BoxLayout:
+			pos: self.parent.pos
+			size_hint: .08, .05
+			Button:
+				border: [0,0,0,0]
+				background_color: [1,1,1,.7]
+				background_normal: 'images/stop.png'
+				background_down: 'images/stop.png'
+				on_release: melodymatrix.silence()				
+			ToggleButton:
+				border: [0,0,0,0]
+				background_color: [1,1,1,.9]
+				background_normal: 'images/lock_open.png'
+				background_down: 'images/lock_closed.png'
+				on_release: melodyscatter.lock(self.state)
+				on_release: fundscatterplane.lock(self.state)
+
+
+	StartScreen:
+
+
+<NotePoint>:
+	canvas:
+		Color:
+			rgba: self.color
+		Ellipse:
+			source: 'images/ball.png'
+			pos: self.pos
+			size: self.size         
+			on_touch_down: self.on_touch_down
+			on_touch_up: self.on_touch_up
+	NotePointLabel:
+
+<StartScreen>:
+	id: startscreen
+	size_hint: 1, 1
+	auto_dismiss: False
+	title: 'TonnetzPlay'
+	on_touch_down: self.parent.parent.on_touch_down
+
+	Label:
+		text_size: self.size
+		halign: 'left'
+		valign: 'top'
+		markup: True
+		text: "[b]Instructions:\n\n\nZoom the Icons to fit your screen, then Lock them and have fun playing.[/b]\n\n\n\n[b]Credits[/b]\n\nThanks to David Canright for his Harmonic Melodic Diagrams, which inspired this app.\n\nThanks also to Larry Polansky for his communications regarding just intonation with limits higher than five.  The app supports higher limits, and they may be later implemented.\n\nThanks to the Kivy team for creating the API that made this possible.\n\nUntold amounts of thanks offered to all the online question answerers and advice givers.\n\n\nCopyright 2015 Garrett Armstrong.  GNU GPL3 licensed.  Source code available at github.com/GarrettArm"
+
+#reference defs
+<SplitPanes@BoxLayout>
+<NoteMatrixFundFloat@FloatLayout>
+<FundStencil@StencilView>
+<FundFloat@FloatLayout>
+<NoteMatrixMelodyFloat@FloatLayout>
+<MelodyStencil@StencilView>
+<MelodyFloat@FloatLayout>
+<MelodyRelative@RelativeLayout>

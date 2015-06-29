@@ -4,10 +4,10 @@
 title = Tonnetz Play
 
 # (str) Package name
-package.name = fromgit
+package.name = tonnetzplay
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = org.garrettarm
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -29,7 +29,7 @@ source.include_exts = py,png,jpg,kv,atlas,ogg
 # version.filename = %(source.dir)s/main.py
 
 # (str) Application versioning (method 2)
-version = 0.94
+version = 0.95
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
