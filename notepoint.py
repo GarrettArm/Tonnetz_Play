@@ -71,6 +71,7 @@ class NotePoint(Widget):
 				self.link_to_melodymatrix.passed_fund_text = self.text
 				self.link_to_melodymatrix.current_fund_tonality = self.tonality
 				self.link_to_melodymatrix.current_fund_relations = self.relations
+
 				if self.parent.complex == u'0':
 					self.link_to_melodymatrix.redraw_layout()
 
