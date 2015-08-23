@@ -86,17 +86,25 @@
 			pos: self.parent.pos
 			size_hint: .08, .05
 			Button:
+				id: settingbutton
 				border: [0,0,0,0]
 				background_color: [1,.91,.43,1]
 				background_normal: 'images/gear.png'
 				background_down: 'images/gear.png'
 				on_release: app.open_settings()
 			Button:
+				id: helpbutton
 				border: [0,0,0,0]
 				background_color: [1,.91,.43,.5]
 				background_normal: 'images/question_mark.png'
 				background_down: 'images/question_mark.png'
 				on_release: root.open_startscreen()
+			#unit test function -- comment out in production app
+			Button:
+				id: testbutton
+				border: [0,0,0,0]
+				background_color: [1,.91,.43,1]
+				on_release: app.unit_tests()
 
 
 	AnchorLayout:
@@ -106,12 +114,14 @@
 			pos: self.parent.pos
 			size_hint: .08, .05
 			Button:
+				id: silencebutton
 				border: [0,0,0,0]
 				background_color: [1,1,1,.7]
 				background_normal: 'images/stop.png'
 				background_down: 'images/stop.png'
 				on_release: melodymatrix.silence()				
 			ToggleButton:
+				id: lockbutton
 				border: [0,0,0,0]
 				background_color: [1,1,1,.9]
 				background_normal: 'images/lock_open.png'
