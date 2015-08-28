@@ -25,25 +25,9 @@ class NotePoint(Widget):
         self.sound = None
         super(NotePoint, self).__init__(*args, **kwargs)
 
-    scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    fifths_cycle = [
-        'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F'
-    ]
-    maj_thirds_cycle = [
-        ['C', 'E', 'G#'], ['D#', 'G', 'B'], ['D', 'F#', 'A#'], ['C#', 'F', 'A']
-    ]
-
-    def GiveNotePointLabel(self, *args):
-        """
-        Adds the appropriate NotePointLabel to each NotePoint
-        """
-        l = NotePointLabel()
-        l.color = [1, .89, .355, 1]
-        l.size = self.size
-        l.center = self.center
-        l.text = self.text
-        l.font_size = 22
-        self.add_widget(l)
+    full_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    fifths_cycle = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F']
+    maj_thirds_cycle = [['C', 'E', 'G#'], ['D#', 'G', 'B'], ['D', 'F#', 'A#'], ['C#', 'F', 'A']]
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
@@ -61,7 +45,7 @@ class NotePoint(Widget):
                 if self.sound:
                     if self.sound.state == 'play':
                         return super(NotePoint, self).on_touch_down(touch)
-                self.SoundPlay()
+                self.play_sound()
                 self.animate()
                 return super(NotePoint, self).on_touch_down(touch)
 
@@ -74,17 +58,21 @@ class NotePoint(Widget):
     def on_touch_move(self, touch):
         if self.collide_point(*touch.pos):
             if self.parent.__class__.__name__ == 'FundMatrix':
+                for instance in App.get_running_app().root.walk(loopback=True):
+                    if instance.__class__.__name__ == 'MelodyMatrix':
+                        instance.current_fund_relations = self.relations
+                        instance.current_fund_tonality = self.tonality
+                        instance.passed_fund_text = self.text
+                        instance.redraw_layout()
+                        instance.rename_child_notepoints()
+                self.animate()
                 return super(NotePoint, self).on_touch_move(touch)
-            else:
+            elif self.parent.__class__.__name__ == 'MelodyMatrix':
                 if self.sound:
                     if self.sound.state == 'play':
-                        pass
-                    else:
-                        self.SoundPlay()
-                        self.animate()
-                else:
-                    self.SoundPlay()
-                    self.animate()
+                        return super(NotePoint, self).on_touch_move(touch)
+                self.play_sound()
+                self.animate()
         return super(NotePoint, self).on_touch_move(touch)
 
     def animate(self):
@@ -100,18 +88,21 @@ class NotePoint(Widget):
     def reset_anim(self, *args):
         self.pressed = False
 
-    def SoundPlay(self):
-        if self.sound:
-            if self.sound.state == 'play':
-                pass
+    def play_sound(self):
+        final_pitch = self.calculate_pitch()
+        soundfile = 'wavs/' + final_pitch + '.wav'
+        self.sound = SoundLoader.load(soundfile)
+        self.sound.loop = True
+        self.sound.play()
 
+    def calculate_pitch(self):
+        """
+        Multiplies the last FundMatrix NotePoint and the currently-touched MelodyMatrix NotePoint.
+        """
         played_note = self.parent.gen_settings_items['key']
         played_octave = 4
         summed_relations = {}
 
-        # everything that follows in this def simply calculates which soundfile to
-        # play.  If android & iOs can be made to pitchshift a sound file, we can
-        # replace this entire block with pitchshift by self.ratio then play().
         summed_relations['octave'] = self.relations[
             'octave'] + self.parent.current_fund_relations['octave']
         summed_relations['fifth'] = self.relations[
@@ -119,8 +110,7 @@ class NotePoint(Widget):
         summed_relations['third'] = self.relations[
             'third'] + self.parent.current_fund_relations['third']
 
-        # calculating the intended note (i.e., A6.wav)
-        # first converting fifths
+        # converting fifths
         while summed_relations['fifth'] > 0:
             if played_note in ('F', 'F#', 'G', 'G#', 'A', 'A#', 'B'):
                 summed_relations['octave'] += 1
@@ -134,30 +124,30 @@ class NotePoint(Widget):
                 self.fifths_cycle.index(played_note) - 1]
             summed_relations['fifth'] += 1
 
-        # then converting thirds - normalizing thirds between -2 and 2,
+        # converting thirds then normalizing thirds between -2 and 2,
         summed_relations['octave'] += int(summed_relations['third'] / 3)
         summed_relations['third'] = int(round(
             3 * (summed_relations['third'] / 3.0 - int(summed_relations['third'] / 3.0))))
 
         # converting thirds to note names & adjusting octaves
         if summed_relations['third'] == -2:
-            if self.scale.index(played_note) < 8:
+            if self.full_scale.index(played_note) < 8:
                 summed_relations['octave'] -= 1
-            played_note = self.scale[self.scale.index(played_note) - 8]
+            played_note = self.full_scale[self.full_scale.index(played_note) - 8]
             summed_relations['third'] = 0
         if summed_relations['third'] == -1:
-            if self.scale.index(played_note) < 4:
+            if self.full_scale.index(played_note) < 4:
                 summed_relations['octave'] -= 1
-            played_note = self.scale[self.scale.index(played_note) - 4]
+            played_note = self.full_scale[self.full_scale.index(played_note) - 4]
             summed_relations['third'] = 0
         if summed_relations['third'] == 2:
-            if self.scale.index(played_note) > 3:
+            if self.full_scale.index(played_note) > 3:
                 summed_relations['octave'] += 1
-            played_note = self.scale[self.scale.index(played_note) - 4]
+            played_note = self.full_scale[self.full_scale.index(played_note) - 4]
         if summed_relations['third'] == 1:
-            if self.scale.index(played_note) > 7:
+            if self.full_scale.index(played_note) > 7:
                 summed_relations['octave'] += 1
-            played_note = self.scale[self.scale.index(played_note) - 8]
+            played_note = self.full_scale[self.full_scale.index(played_note) - 8]
             summed_relations['third'] = 0
 
         # setting C4 as the 0th octave & limiting the notes to C2 to C8
@@ -169,22 +159,13 @@ class NotePoint(Widget):
             played_octave = 2
             played_note = 'C'
 
-        # play the note just calculated
-        # soundfile = 'ogg/G3.ogg'
-        # if building for android or linux use ogg & swap in the ogg folder & out the wav folder
-        # do the opposite if building for iOS
-        # soundfile = 'ogg/'+str(played_note)+str(played_octave)+'.ogg'
-        # with new sdl2 library, it's possible a build using ogg's will work
-        # for both android & iOs.
-        soundfile = 'wavs/' + str(played_note) + str(played_octave) + '.wav'
-        self.sound = SoundLoader.load(soundfile)
-        self.sound.loop = True
-        self.sound.play()
+        return played_note + str(played_octave)
 
     def make_related_note(self, relation):
         """
         Makes one new NotePoint object, using two arguments: the passed NotePoint object, and the relation between the passed NotePoint and the one to be made.
         """
+        rel = relation.split('_')
         relations_key = {
             'octave_up':   [2.0,       0,  100],
             'octave_down': [0.5,       0, -100],
@@ -193,12 +174,13 @@ class NotePoint(Widget):
             'fifth_up':    [1.5,      38,   58.3],
             'fifth_down':  [2.0 / 3, -38,  -58.3]
         }
-        rel = relation.split('_')
+
         new_note = NotePoint()
-        new_note.center = [self.center_x + relations_key[relation]
-                           [1], self.center_y + relations_key[relation][2]]
+        new_note.center = [self.center_x + relations_key[relation][1],
+                           self.center_y + relations_key[relation][2]]
         new_note.ratio = self.ratio * relations_key[relation][0]
         new_note.relations = dict(self.relations)
+
         if rel[1] == 'up':
             new_note.relations[rel[0]] += 1
         elif rel[1] == 'down':
@@ -230,7 +212,20 @@ class NotePoint(Widget):
                     new_note.text = self.fifths_cycle[
                         self.fifths_cycle.index(self.text) + 1]
         self.parent.add_widget(new_note)
-        new_note.GiveNotePointLabel()
-        self.parent.ratios_set.add(new_note.ratio)
+        new_note.attach_label()
+
         if rel[0] == 'octave':
-            self.parent.next_octave.add(new_note)
+            self.parent.next_octave_set.add(new_note)
+        self.parent.ratios_set.add(new_note.ratio)
+
+    def attach_label(self, *args):
+        """
+        Adds the appropriate NotePointLabel to each NotePoint
+        """
+        l = NotePointLabel()
+        l.color = [1, .89, .355, 1]
+        l.size = self.size
+        l.center = self.center
+        l.text = self.text
+        l.font_size = 22
+        self.add_widget(l)

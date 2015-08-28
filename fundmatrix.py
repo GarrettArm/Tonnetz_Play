@@ -13,8 +13,8 @@ class FundMatrix(MyRelativeLayout):
         super(FundMatrix, self).__init__(**kwargs)
 
     ratios_set = set()
-    first_octave = set()
-    next_octave = set()
+    first_octave_set = set()
+    next_octave_set = set()
 
     def set_tonality(self):
         """

@@ -52,8 +52,7 @@ class MyRelativeLayout(RelativeLayout):
             if i.sound:
                 i.sound.stop()
         self.clear_widgets()
-        self.ratios_set, self.first_octave, self.next_octave = set(
-        ), set(), set()
+        self.ratios_set, self.first_octave_set, self.next_octave_set = set(), set(), set()
         for i in self.canvas.before.children:
             if i.__class__.__name__ in ('Line', 'Color'):
                 self.canvas.before.remove(i)
@@ -62,15 +61,16 @@ class MyRelativeLayout(RelativeLayout):
         """
         Creates a root_note NotePoint object, then executes defs that create the rest of the matrix NotePoints.  Afterward, it starts the def that draws the lines.
         """
-        self.root_note = NotePoint()
-        self.root_note.text = self.gen_settings_items['key']
-        self.root_note.center = [200, 200]
-        self.root_note.ratio = 1
-        self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
-        self.root_note.tonality = self.gen_settings_items['scale']
-        NotePoint.GiveNotePointLabel(self.root_note)
-        self.add_widget(self.root_note)
-        self.make_first_octave(self.root_note)
+
+        a = NotePoint()
+        a.text = self.gen_settings_items['key']
+        a.center = [200, 200]
+        a.ratio = 1
+        a.relations = {'octave': 0, 'fifth': 0, 'third': 0}
+        a.tonality = self.gen_settings_items['scale']
+        NotePoint.attach_label(a)
+        self.add_widget(a)
+        self.make_first_octave(a)
         self.add_lines()
 
     def set_tonality(self):
@@ -122,8 +122,9 @@ class MyRelativeLayout(RelativeLayout):
             settings_dict = self.fund_settings_items
         elif self.__class__.__name__ == 'MelodyMatrix':
             settings_dict = self.melody_settings_items
+
         for i in self.children:
-            self.first_octave.add(i)
+            self.first_octave_set.add(i)
 
         for i in ['octaves_up', 'octaves_down']:
             count = 0
@@ -134,14 +135,6 @@ class MyRelativeLayout(RelativeLayout):
             while count < int(settings_dict[i]):
                 self.create_next_octave(i[:i.find('s')] + i[i.find('s') + 1:])
                 count += 1
-
-        count = 0
-        if int(settings_dict['octaves_down']) > 0:
-            self.create_next_notepoint('octave_down')
-            count += 1
-        while count < int(settings_dict['octaves_down']):
-            self.create_next_octave('octave_down')
-            count += 1
 
     relations_key = {
         'octave_up':   [2.0,       0,  100],
@@ -165,8 +158,8 @@ class MyRelativeLayout(RelativeLayout):
         """
         Looks at a pseudo-registry at MelodyMatrix or FundMatrix, holding the NotePoints in the first octave.  Add an octave up or down for each NotePoint, depending of the *arg relation.
         """
-        self.temp_octave = self.next_octave
-        self.next_octave = set()
+        self.temp_octave = self.next_octave_set
+        self.next_octave_set = set()
         for i in self.temp_octave:
             self.ratios_set.add(i.ratio)
             if i.ratio * self.relations_key[relation][0] not in self.ratios_set:
@@ -188,9 +181,7 @@ class MyRelativeLayout(RelativeLayout):
         """
         Removes a NotePoint, specifically the bottom right one
         """
-        rounded_ratios_set = []
-        for i in self.ratios_set:
-            rounded_ratios_set.append(round(i, 3))
+        rounded_ratios_set = {round(i, 3) for i in self.ratios_set}
         for i in self.children:
             if round(i.ratio * 1.25, 3) in rounded_ratios_set:
                 if round(i.ratio * 2 / 3, 3) in rounded_ratios_set:
@@ -201,8 +192,7 @@ class MyRelativeLayout(RelativeLayout):
 
     def add_lines(self):
         """
-        Draws a line on self.canvas.before between any NotePoints related by a \
-        Perfect Fifth or Major Third. \
+        Draws a line on self.canvas.before between any NotePoints related by a Perfect Fifth or Major Third.
         A brighter line for the first octave, a darker one for the others.
         """
         for item_x in self.children:
@@ -210,7 +200,7 @@ class MyRelativeLayout(RelativeLayout):
                 for ratio_item in [1.5, 1.25]:
                     if round(item_x.ratio, 3) == round(item_y.ratio / ratio_item, 3):
                         with self.canvas.before:
-                            if item_x in self.first_octave:
+                            if item_x in self.first_octave_set:
                                 Color(1, 1, 1, 1)
                             else:
                                 Color(0.6, 0.6, 0.6, 1)
