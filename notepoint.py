@@ -34,11 +34,10 @@ class NotePoint(Widget):
             if self.parent.__class__.__name__ == 'FundMatrix':
                 for instance in App.get_running_app().root.walk(loopback=True):
                     if instance.__class__.__name__ == 'MelodyMatrix':
-                        instance.current_fund_relations = self.relations
-                        instance.current_fund_tonality = self.tonality
-                        instance.passed_fund_text = self.text
-                        instance.redraw_layout()
-                        instance.rename_child_notepoints()
+                        instance.last_fund_pos = self.relations
+                        instance.last_fund_tonality = self.tonality
+                        instance.redraw_layout(text=self.text)
+                        instance.rename_child_notepoints(self.text)
                 self.animate()
                 return super(NotePoint, self).on_touch_down(touch)
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
@@ -60,11 +59,10 @@ class NotePoint(Widget):
             if self.parent.__class__.__name__ == 'FundMatrix':
                 for instance in App.get_running_app().root.walk(loopback=True):
                     if instance.__class__.__name__ == 'MelodyMatrix':
-                        instance.current_fund_relations = self.relations
-                        instance.current_fund_tonality = self.tonality
-                        instance.passed_fund_text = self.text
-                        instance.redraw_layout()
-                        instance.rename_child_notepoints()
+                        instance.last_fund_pos = self.relations
+                        instance.last_fund_tonality = self.tonality
+                        instance.redraw_layout(text=self.text)
+                        instance.rename_child_notepoints(self.text)
                 self.animate()
                 return super(NotePoint, self).on_touch_move(touch)
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
@@ -103,12 +101,9 @@ class NotePoint(Widget):
         played_octave = 4
         summed_relations = {}
 
-        summed_relations['octave'] = self.relations[
-            'octave'] + self.parent.current_fund_relations['octave']
-        summed_relations['fifth'] = self.relations[
-            'fifth'] + self.parent.current_fund_relations['fifth']
-        summed_relations['third'] = self.relations[
-            'third'] + self.parent.current_fund_relations['third']
+        summed_relations['octave'] = self.relations['octave'] + self.parent.last_fund_pos['octave']
+        summed_relations['fifth'] = self.relations['fifth'] + self.parent.last_fund_pos['fifth']
+        summed_relations['third'] = self.relations['third'] + self.parent.last_fund_pos['third']
 
         # converting fifths
         while summed_relations['fifth'] > 0:

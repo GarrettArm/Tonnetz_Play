@@ -1,12 +1,12 @@
 # File name: fundmatrix.py
 
-from myrelativelayout import MyRelativeLayout
+from matrixbase import MatrixBase
 
 
-class FundMatrix(MyRelativeLayout):
+class FundMatrix(MatrixBase):
 
     """
-    This is the left pane of the display window.  It inherits most of its functions from MyRelativeLayout.  It holds an arbitrary number of NotePoints, which set the fundamental frequency for the NotePoints of MelodyMatrix.
+    This is the left pane of the display window.  It inherits most of its functions from MatrixBase.  It holds an arbitrary number of NotePoints, which set the fundamental frequency for the NotePoints of MelodyMatrix.
     """
 
     def __init__(self, **kwargs):

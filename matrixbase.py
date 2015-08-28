@@ -1,4 +1,4 @@
-# File name: myrelativelayout.py
+# File name: matrixbase.py
 
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.config import ConfigParser
@@ -8,7 +8,7 @@ from kivy.graphics import Line, Color
 from notepoint import NotePoint
 
 
-class MyRelativeLayout(RelativeLayout):
+class MatrixBase(RelativeLayout):
 
     """
     Base class for MelodyMatrix and FundMatrix.
@@ -17,14 +17,14 @@ class MyRelativeLayout(RelativeLayout):
     gen_settings_items = {}
     fund_settings_items = {}
     melody_settings_items = {}
-    current_fund_tonality = None
-    current_fund_text = None
-    passed_fund_text = None
+    last_fund_pos = {'octave': 0, 'fifth': 0, 'third': 0}
+    last_fund_tonality = None
+    key = None
 
     def __init__(self, **kwargs):
         super(RelativeLayout, self).__init__(**kwargs)
         self.get_config_variables()
-        self.redraw_layout()
+        self.redraw_layout(text=self.key)
 
     def get_config_variables(self, *args):
         """
@@ -39,13 +39,12 @@ class MyRelativeLayout(RelativeLayout):
             self.fund_settings_items[k] = v
         for k, v in settings.items('Melody'):
             self.melody_settings_items[k] = v
-        self.current_fund_tonality = self.gen_settings_items['scale']
-        self.current_fund_text = self.gen_settings_items['key']
-        self.passed_fund_text = self.gen_settings_items['key']
+        self.last_fund_tonality = self.gen_settings_items['scale']
+        self.key = self.gen_settings_items['key']
 
-    def redraw_layout(self, *args):
+    def redraw_layout(self, **kwargs):
         self.clear_layout()
-        self.draw_layout()
+        self.draw_layout(text=self.key)
 
     def clear_layout(self):
         for i in self.children:
@@ -57,13 +56,13 @@ class MyRelativeLayout(RelativeLayout):
             if i.__class__.__name__ in ('Line', 'Color'):
                 self.canvas.before.remove(i)
 
-    def draw_layout(self):
+    def draw_layout(self, text):
         """
         Creates a root_note NotePoint object, then executes defs that create the rest of the matrix NotePoints.  Afterward, it starts the def that draws the lines.
         """
 
         a = NotePoint()
-        a.text = self.gen_settings_items['key']
+        a.text = text
         a.center = [200, 200]
         a.ratio = 1
         a.relations = {'octave': 0, 'fifth': 0, 'third': 0}
@@ -105,11 +104,11 @@ class MyRelativeLayout(RelativeLayout):
             self.make_next_octaves()
 
         elif self.gen_settings_items['complex'] == u'0':
-            if self.current_fund_tonality == 'Major':
+            if self.last_fund_tonality == 'Major':
                 for i in ['fifth_up', 'third_up']:
                     self.create_next_notepoint(i)
                 self.remove_top_third()
-            elif self.current_fund_tonality == 'Minor':
+            elif self.last_fund_tonality == 'Minor':
                 for i in ['fifth_up', 'third_down']:
                     self.create_next_notepoint(i)
                 self.remove_bottom_third()
