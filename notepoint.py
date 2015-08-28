@@ -11,29 +11,32 @@ from kivy.core.audio import SoundLoader
 
 class NotePointLabel(Label):
 
-    def __init__(self, **kwargs):
-        super(NotePointLabel, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(NotePointLabel, self).__init__(*args, **kwargs)
 
 
 class NotePoint(Widget):
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.pressed = False
         self.size = [50, 50]
         self.color = [0.586, 0.45, 0.265, .9]
-        self.link_to_melodymatrix = None
         self.tonality = None
         self.sound = None
-        super(NotePoint, self).__init__(**kwargs)
+        super(NotePoint, self).__init__(*args, **kwargs)
 
-    fifths_cycle = [
-        'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F']
-    maj_thirds_cycle = [
-        ['C', 'E', 'G#'], ['D#', 'G', 'B'], ['D', 'F#', 'A#'], ['C#', 'F', 'A']]
     scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    fifths_cycle = [
+        'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F'
+    ]
+    maj_thirds_cycle = [
+        ['C', 'E', 'G#'], ['D#', 'G', 'B'], ['D', 'F#', 'A#'], ['C#', 'F', 'A']
+    ]
 
     def GiveNotePointLabel(self, *args):
-        '''Adds the appropriate NotePointLabel to each NotePoint'''
+        """
+        Adds the appropriate NotePointLabel to each NotePoint
+        """
         l = NotePointLabel()
         l.color = [1, .89, .355, 1]
         l.size = self.size
@@ -44,50 +47,20 @@ class NotePoint(Widget):
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
-            # check if melodymatrix already linked, otherwise find & link it.
-            # once android build stops bugging on .walk , use this code:
-            '''
-            if 'fundmatrix' in str(type(self.parent)):
-                    if self.link_to_melodymatrix:
-                            pass
-                    else:
-                            running_app = App.get_running_app()
-                            for i in running_app.root.walk():
-                                    if "MelodyMatrix" in str(type(i)):
-                                            self.link_to_melodymatrix = i'''
-
-            # until android build stops bugging on .walk , use this kludge:
-            if 'fundmatrix' in str(type(self.parent)):
-                if self.link_to_melodymatrix:
-                    pass
-                else:
-                    running_app = App.get_running_app()
-                    for a in running_app.root.children:
-                        for b in a.children:
-                            for c in b.children:
-                                for d in c.children:
-                                    for e in d.children:
-                                        for f in e.children:
-                                            for g in f.children:
-                                                g_name = str(type(g))
-                                                if "MelodyMatrix" in g_name:
-                                                    self.link_to_melodymatrix = g
-                # run on_touch_down actions
-                self.link_to_melodymatrix.passed_fund_text = self.text
-                self.link_to_melodymatrix.current_fund_tonality = self.tonality
-                self.link_to_melodymatrix.current_fund_relations = self.relations
-
-                if self.parent.complex == u'0':
-                    self.link_to_melodymatrix.redraw_layout()
-
-                self.link_to_melodymatrix.rename_child_notepoints()
-
+            if self.parent.__class__.__name__ == 'FundMatrix':
+                for instance in App.get_running_app().root.walk(loopback=True):
+                    if instance.__class__.__name__ == 'MelodyMatrix':
+                        instance.current_fund_relations = self.relations
+                        instance.current_fund_tonality = self.tonality
+                        instance.passed_fund_text = self.text
+                        instance.redraw_layout()
+                        instance.rename_child_notepoints()
                 self.animate()
                 return super(NotePoint, self).on_touch_down(touch)
-            elif 'melodymatrix' in str(type(self.parent)):
+            elif self.parent.__class__.__name__ == 'MelodyMatrix':
                 if self.sound:
                     if self.sound.state == 'play':
-                        return True
+                        return super(NotePoint, self).on_touch_down(touch)
                 self.SoundPlay()
                 self.animate()
                 return super(NotePoint, self).on_touch_down(touch)
@@ -99,25 +72,22 @@ class NotePoint(Widget):
                 return super(NotePoint, self).on_touch_up(touch)
 
     def on_touch_move(self, touch):
-        # is this class necessary?  on_touch_down() should do the same thing.
         if self.collide_point(*touch.pos):
-            if 'fundmatrix' in str(type(self.parent)):
+            if self.parent.__class__.__name__ == 'FundMatrix':
                 return super(NotePoint, self).on_touch_move(touch)
             else:
                 if self.sound:
                     if self.sound.state == 'play':
-                        return super(NotePoint, self).on_touch_move(touch)
+                        pass
                     else:
                         self.SoundPlay()
                         self.animate()
                 else:
                     self.SoundPlay()
                     self.animate()
-            return super(NotePoint, self).on_touch_move(touch)
+        return super(NotePoint, self).on_touch_move(touch)
 
     def animate(self):
-        # if clause and on_complete necessary, else animation bugs & grows with
-        # each doubleclick.
         if not self.pressed:
             self.pressed = True
             self.move_down = [self.center_x - 2, self.center_y - 2]
@@ -135,7 +105,7 @@ class NotePoint(Widget):
             if self.sound.state == 'play':
                 pass
 
-        played_note = str(self.parent.key)
+        played_note = self.parent.gen_settings_items['key']
         played_octave = 4
         summed_relations = {}
 
@@ -200,10 +170,10 @@ class NotePoint(Widget):
             played_note = 'C'
 
         # play the note just calculated
-                # soundfile = 'ogg/G3.ogg'
-                # if building for android or linux use ogg & swap in the ogg folder & out the wav folder
-                # do the opposite if building for iOS
-                # soundfile = 'ogg/'+str(played_note)+str(played_octave)+'.ogg'
+        # soundfile = 'ogg/G3.ogg'
+        # if building for android or linux use ogg & swap in the ogg folder & out the wav folder
+        # do the opposite if building for iOS
+        # soundfile = 'ogg/'+str(played_note)+str(played_octave)+'.ogg'
         # with new sdl2 library, it's possible a build using ogg's will work
         # for both android & iOs.
         soundfile = 'wavs/' + str(played_note) + str(played_octave) + '.wav'
@@ -211,89 +181,56 @@ class NotePoint(Widget):
         self.sound.loop = True
         self.sound.play()
 
-    # instructions how to make other notepoints.  First NotePoint is made in FundMatrix and MelodyMatrix.
-    # these are repetitive & should be refactored
-
-    def make_up_fifth(self, root_note, *args):
+    def make_related_note(self, relation):
+        """
+        Makes one new NotePoint object, using two arguments: the passed NotePoint object, and the relation between the passed NotePoint and the one to be made.
+        """
+        relations_key = {
+            'octave_up':   [2.0,       0,  100],
+            'octave_down': [0.5,       0, -100],
+            'third_up':    [1.25,   -105,   33.3],
+            'third_down':  [0.8,     105,  -33.3],
+            'fifth_up':    [1.5,      38,   58.3],
+            'fifth_down':  [2.0 / 3, -38,  -58.3]
+        }
+        rel = relation.split('_')
         new_note = NotePoint()
-        new_note.center = [self.center_x + 38, self.center_y + 58.3]
-        new_note.ratio = self.ratio * 1.5
+        new_note.center = [self.center_x + relations_key[relation]
+                           [1], self.center_y + relations_key[relation][2]]
+        new_note.ratio = self.ratio * relations_key[relation][0]
         new_note.relations = dict(self.relations)
-        new_note.relations['fifth'] += 1
-        if self.fifths_cycle.index(self.text) == len(self.fifths_cycle) - 1:
-            new_note.text = self.fifths_cycle[0]
-        else:
-            new_note.text = self.fifths_cycle[
-                self.fifths_cycle.index(self.text) + 1]
-        self.parent.add_widget(new_note)
-        new_note.GiveNotePointLabel()
-        self.parent.ratios_set.add(new_note.ratio)
-
-    def make_down_fifth(self, root_note, *args):
-        new_note = NotePoint()
-        new_note.center = [self.center_x - 38, self.center_y - 58.3]
-        new_note.ratio = self.ratio * 2.0 / 3
-        new_note.relations = dict(self.relations)
-        new_note.relations['fifth'] -= 1
-        new_note.text = self.fifths_cycle[
-            self.fifths_cycle.index(self.text) - 1]
-        self.parent.add_widget(new_note)
-        new_note.GiveNotePointLabel()
-        self.parent.ratios_set.add(new_note.ratio)
-
-    def make_maj_third_up(self, root_note, *args):
-        new_note = NotePoint()
-        new_note.center = [self.center_x - 105, self.center_y + 33.3]
-        new_note.ratio = self.ratio * 1.25
-        new_note.relations = dict(self.relations)
-        new_note.relations['third'] += 1
-        for i in xrange(4):
-            if self.text in self.maj_thirds_cycle[i]:
-                if self.maj_thirds_cycle[i].index(self.text) == len(self.maj_thirds_cycle[i]) - 1:
-                    new_note.text = self.maj_thirds_cycle[i][0]
+        if rel[1] == 'up':
+            new_note.relations[rel[0]] += 1
+        elif rel[1] == 'down':
+            new_note.relations[rel[0]] -= 1
+        if rel[0] == 'octave':
+            new_note.text = self.text
+            new_note.tonality = self.tonality
+        elif rel[0] == 'third':
+            for i in xrange(4):
+                if self.text in self.maj_thirds_cycle[i]:
+                    if rel[1] == 'down':
+                        if self.text in self.maj_thirds_cycle[i]:
+                            new_note.text = self.maj_thirds_cycle[i][
+                                self.maj_thirds_cycle[i].index(self.text) - 1]
+                    elif rel[1] == 'up':
+                        if self.maj_thirds_cycle[i].index(self.text) == len(self.maj_thirds_cycle[i]) - 1:
+                            new_note.text = self.maj_thirds_cycle[i][0]
+                        else:
+                            new_note.text = self.maj_thirds_cycle[i][
+                                self.maj_thirds_cycle[i].index(self.text) + 1]
+        elif rel[0] == 'fifth':
+            if rel[1] == 'down':
+                new_note.text = self.fifths_cycle[
+                    self.fifths_cycle.index(self.text) - 1]
+            elif rel[1] == 'up':
+                if self.fifths_cycle.index(self.text) == len(self.fifths_cycle) - 1:
+                    new_note.text = self.fifths_cycle[0]
                 else:
-                    new_note.text = self.maj_thirds_cycle[i][
-                        self.maj_thirds_cycle[i].index(self.text) + 1]
+                    new_note.text = self.fifths_cycle[
+                        self.fifths_cycle.index(self.text) + 1]
         self.parent.add_widget(new_note)
         new_note.GiveNotePointLabel()
         self.parent.ratios_set.add(new_note.ratio)
-
-    def make_maj_third_down(self, root_note, *args):
-        new_note = NotePoint()
-        new_note.center = [self.center_x + 105, self.center_y - 33.3]
-        new_note.ratio = self.ratio * 0.8
-        new_note.relations = dict(self.relations)
-        new_note.relations['third'] -= 1
-        for i in xrange(4):
-            if self.text in self.maj_thirds_cycle[i]:
-                new_note.text = self.maj_thirds_cycle[i][
-                    self.maj_thirds_cycle[i].index(self.text) - 1]
-        self.parent.add_widget(new_note)
-        new_note.GiveNotePointLabel()
-        self.parent.ratios_set.add(new_note.ratio)
-
-    def make_octave_up(self, root_note, *args):
-        new_note = NotePoint()
-        new_note.center = [self.center_x, self.center_y + 100]
-        new_note.ratio = self.ratio * 2.0
-        new_note.relations = dict(self.relations)
-        new_note.relations['octave'] += 1
-        new_note.text = self.text
-        new_note.tonality = self.tonality
-        self.parent.add_widget(new_note)
-        new_note.GiveNotePointLabel()
-        self.parent.ratios_set.add(new_note.ratio)
-        self.parent.next_octave.add(new_note)
-
-    def make_octave_down(self, root_note, *args):
-        new_note = NotePoint()
-        new_note.center = [self.center_x, self.center_y - 100]
-        new_note.ratio = self.ratio / 2.0
-        new_note.relations = dict(self.relations)
-        new_note.relations['octave'] -= 1
-        new_note.text = self.text
-        new_note.tonality = self.tonality
-        self.parent.add_widget(new_note)
-        new_note.GiveNotePointLabel()
-        self.parent.ratios_set.add(new_note.ratio)
-        self.parent.next_octave.add(new_note)
+        if rel[0] == 'octave':
+            self.parent.next_octave.add(new_note)

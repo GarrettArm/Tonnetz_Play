@@ -1,3 +1,4 @@
+# File name: settingsjson.py
 import json
 
 general_settings_json = json.dumps([

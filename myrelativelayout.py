@@ -10,141 +10,172 @@ from notepoint import NotePoint
 
 class MyRelativeLayout(RelativeLayout):
 
+    """
+    Base class for MelodyMatrix and FundMatrix.
+    """
+
+    gen_settings_items = {}
+    fund_settings_items = {}
+    melody_settings_items = {}
+    current_fund_tonality = None
+    current_fund_text = None
+    passed_fund_text = None
+
     def __init__(self, **kwargs):
         super(RelativeLayout, self).__init__(**kwargs)
         self.get_config_variables()
         self.redraw_layout()
 
+    def get_config_variables(self, *args):
+        """
+        Imports the latest config variables from the ini file.
+        """
+        current_ini = App.get_running_app().get_application_config()
+        settings = ConfigParser()
+        settings.read(current_ini)
+        for k, v in settings.items('General'):
+            self.gen_settings_items[k] = v
+        for k, v in settings.items('Fundamental'):
+            self.fund_settings_items[k] = v
+        for k, v in settings.items('Melody'):
+            self.melody_settings_items[k] = v
+        self.current_fund_tonality = self.gen_settings_items['scale']
+        self.current_fund_text = self.gen_settings_items['key']
+        self.passed_fund_text = self.gen_settings_items['key']
+
     def redraw_layout(self, *args):
         self.clear_layout()
         self.draw_layout()
 
-    def get_config_variables(self, *args):
-        '''Imports the latest config variables from the ini file.'''
-        settings = ConfigParser()
-        current_ini = App.get_running_app().get_application_config()
-        settings.read(current_ini)
-        for k, v in settings.items('General'):
-            setattr(self, k, v)
-            # self.scale, self.complex, and self.key assigned
-        for k, v in settings.items('Melody'):
-            setattr(self, k, int(v))
-            # self.octaves, self.fifths, self.thirds _up and _down assigned
-        self.current_fund_tonality = self.scale
-        self.current_fund_text = str(self.key)
-        self.passed_fund_text = str(self.key)
-
     def clear_layout(self):
-        '''Clears the layout of all items.'''
-        for i in self.children:  # stops each sound
+        for i in self.children:
             if i.sound:
                 i.sound.stop()
-        self.clear_widgets()  # removes NotePoints & Lines
-        self.ratios_set = set()  # resets the reference sets
-        self.first_octave = set()
-        self.next_octave = set()
-        for i in self.canvas.before.children:  # removes Lines
-            if 'Line object' in str(i):
+        self.clear_widgets()
+        self.ratios_set, self.first_octave, self.next_octave = set(
+        ), set(), set()
+        for i in self.canvas.before.children:
+            if i.__class__.__name__ in ('Line', 'Color'):
                 self.canvas.before.remove(i)
 
     def draw_layout(self):
-        '''Creates a single NotePoint object, then starts the defs that \
-        create the rest of the matrix NotePoints.  Afterward, it starts the \
-        def that draws the lines.'''
+        """
+        Creates a root_note NotePoint object, then executes defs that create the rest of the matrix NotePoints.  Afterward, it starts the def that draws the lines.
+        """
         self.root_note = NotePoint()
-        self.root_note.text = self.key
+        self.root_note.text = self.gen_settings_items['key']
         self.root_note.center = [200, 200]
         self.root_note.ratio = 1
         self.root_note.relations = {'octave': 0, 'fifth': 0, 'third': 0}
-        if self.scale == 'Major':
-            self.root_note.tonality = 'Major'
-        else:
-            self.root_note.tonality = 'Minor'
+        self.root_note.tonality = self.gen_settings_items['scale']
         NotePoint.GiveNotePointLabel(self.root_note)
         self.add_widget(self.root_note)
         self.make_first_octave(self.root_note)
         self.add_lines()
 
     def set_tonality(self):
-        '''When this class is super'ed by melodymatrix, pass.
-        When it's super'ed by fundmatrix, it's overloaded.'''
+        """
+        When this class is super'ed by melodymatrix, pass.
+        When it's super'ed by fundmatrix, it's overloaded.
+        """
         pass
 
     def make_first_octave(self, *args):
-        # u'1' instead of True, r/t python2's unicode vs boolean problem
-        if self.complex == u'1' or 'fundmatrix' in str(self):
-            # if complex selected, do the normal major/minor layouts
-            if self.scale == 'Major':
-                self.execute_add_fifth()
-                self.execute_add_fifth()
-                self.execute_add_down_fifth()
-                self.execute_add_up_third()
+        if self.__class__.__name__ == 'FundMatrix':
+            settings_dict = self.fund_settings_items
+        elif self.__class__.__name__ == 'MelodyMatrix':
+            settings_dict = self.melody_settings_items
+
+        if self.gen_settings_items['scale'] == 'Freehand':
+            for a in ['fifths_up', 'fifths_down', 'thirds_up', 'thirds_down']:
+                for i in xrange(int(settings_dict[a])):
+                    self.create_next_notepoint(
+                        a[:a.find('s')] + a[a.find('s') + 1:])
+
+        elif self.gen_settings_items['complex'] == u'1' or self.__class__.__name__ == 'FundMatrix':
+            if self.gen_settings_items['scale'] == 'Major':
+                for i in ['fifth_up', 'fifth_up', 'fifth_down', 'third_up']:
+                    self.create_next_notepoint(i)
                 self.remove_top_third()
-                self.set_tonality()
-                self.make_next_octaves()
-            elif self.scale == 'Minor':
-                self.execute_add_fifth()
-                self.execute_add_fifth()
-                self.execute_add_down_fifth()
-                self.execute_add_down_third()
+            elif self.gen_settings_items['scale'] == 'Minor':
+                for i in ['fifth_up', 'fifth_up', 'fifth_down', 'third_down']:
+                    self.create_next_notepoint(i)
                 self.remove_bottom_third()
-                self.set_tonality()
-                self.make_next_octaves()
-            elif self.scale == 'Freehand':
-                count = 0
-                while count < self.fifths_up:
-                    self.execute_add_fifth()
-                    count += 1
-                count = 0
-                while count < self.fifths_down:
-                    self.execute_add_down_fifth()
-                    count += 1
-                count = 0
-                while count < self.thirds_up:
-                    self.execute_add_up_third()
-                    count += 1
-                count = 0
-                while count < self.thirds_down:
-                    self.execute_add_down_third()
-                    count += 1
-        elif self.complex == u'0':
-            if self.scale == 'Freehand':
-                count = 0
-                while count < self.fifths_up:
-                    self.execute_add_fifth()
-                    count += 1
-                count = 0
-                while count < self.fifths_down:
-                    self.execute_add_down_fifth()
-                    count += 1
-                count = 0
-                while count < self.thirds_up:
-                    self.execute_add_up_third()
-                    count += 1
-                count = 0
-                while count < self.thirds_down:
-                    self.execute_add_down_third()
-                    count += 1
-            else:
-                if self.current_fund_tonality == 'Major':
-                    self.execute_add_fifth()
-                    self.execute_add_up_third()
-                    self.remove_top_third()
-                    # hack to hardcode two octaves up & one octave down for
-                    # easymode.
-                    self.octaves_up = 2
-                    self.octaves_down = 1
-                    self.make_next_octaves()
-                elif self.current_fund_tonality == 'Minor':
-                    self.execute_add_fifth()
-                    self.execute_add_down_third()
-                    self.remove_bottom_third()
-                    self.octaves_up = 2
-                    self.octaves_down = 1
-                    self.make_next_octaves()
+            self.set_tonality()
+            self.make_next_octaves()
+
+        elif self.gen_settings_items['complex'] == u'0':
+            if self.current_fund_tonality == 'Major':
+                for i in ['fifth_up', 'third_up']:
+                    self.create_next_notepoint(i)
+                self.remove_top_third()
+            elif self.current_fund_tonality == 'Minor':
+                for i in ['fifth_up', 'third_down']:
+                    self.create_next_notepoint(i)
+                self.remove_bottom_third()
+            self.octaves_up = 2
+            self.octaves_down = 1
+            self.make_next_octaves()
+
+    def make_next_octaves(self, *args):
+        if self.__class__.__name__ == 'FundMatrix':
+            settings_dict = self.fund_settings_items
+        elif self.__class__.__name__ == 'MelodyMatrix':
+            settings_dict = self.melody_settings_items
+        for i in self.children:
+            self.first_octave.add(i)
+
+        for i in ['octaves_up', 'octaves_down']:
+            count = 0
+            if int(settings_dict[i]) > 0:
+                self.create_next_notepoint(
+                    i[:i.find('s')] + i[i.find('s') + 1:])
+                count += 1
+            while count < int(settings_dict[i]):
+                self.create_next_octave(i[:i.find('s')] + i[i.find('s') + 1:])
+                count += 1
+
+        count = 0
+        if int(settings_dict['octaves_down']) > 0:
+            self.create_next_notepoint('octave_down')
+            count += 1
+        while count < int(settings_dict['octaves_down']):
+            self.create_next_octave('octave_down')
+            count += 1
+
+    relations_key = {
+        'octave_up':   [2.0,       0,  100],
+        'octave_down': [0.5,       0, -100],
+        'third_up':    [1.25,   -105,   33.3],
+        'third_down':  [0.8,     105,  -33.3],
+        'fifth_up':    [1.5,      38,   58.3],
+        'fifth_down':  [2.0 / 3, -38,  -58.3]
+    }
+
+    def create_next_notepoint(self, relation):
+        """
+        Accepts a relation, then adds one NotePoint for each existant NotePoint in the direction of the relation - unless one already exists in that position.
+        """
+        for i in self.children:
+            self.ratios_set.add(i.ratio)
+            if i.ratio * self.relations_key[relation][0] not in self.ratios_set:
+                i.make_related_note(relation)
+
+    def create_next_octave(self, relation):
+        """
+        Looks at a pseudo-registry at MelodyMatrix or FundMatrix, holding the NotePoints in the first octave.  Add an octave up or down for each NotePoint, depending of the *arg relation.
+        """
+        self.temp_octave = self.next_octave
+        self.next_octave = set()
+        for i in self.temp_octave:
+            self.ratios_set.add(i.ratio)
+            if i.ratio * self.relations_key[relation][0] not in self.ratios_set:
+                i.make_related_note(relation)
 
     def remove_top_third(self, *args):
-        '''Removes a NotePoint, specifically the top left one.'''
+        """
+        Removes a NotePoint, specifically the top left one.
+        """
         for i in self.children:
             if i.ratio * 0.8 in self.ratios_set:
                 if i.ratio * 1.5 in self.ratios_set:
@@ -154,7 +185,9 @@ class MyRelativeLayout(RelativeLayout):
                     self.ratios_set.remove(i.ratio)
 
     def remove_bottom_third(self, *args):
-        '''Removes a NotePoint, specifically the bottom right one'''
+        """
+        Removes a NotePoint, specifically the bottom right one
+        """
         rounded_ratios_set = []
         for i in self.ratios_set:
             rounded_ratios_set.append(round(i, 3))
@@ -166,83 +199,12 @@ class MyRelativeLayout(RelativeLayout):
                     self.remove_widget(i)
                     self.ratios_set.remove(i.ratio)
 
-    def make_next_octaves(self, *args):
-        for i in self.children:
-            self.first_octave.add(i)
-        count = 0
-        if self.octaves_up > 0:
-            self.execute_add_octave_up()
-            count += 1
-        while count < self.octaves_up:
-            self.execute_add_next_octave_up()
-            count += 1
-        count = 0
-        if self.octaves_down > 0:
-            self.execute_add_octave_down()
-            count += 1
-        while count < self.octaves_down:
-            self.execute_add_next_octave_down()
-            count += 1
-
-    # these are very repetive, i should refactor them.
-    def execute_add_fifth(self, *args):
-        for i in self.children:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 1.5 not in self.ratios_set:
-                i.make_up_fifth(self.root_note)
-
-    def execute_add_down_fifth(self, *args):
-        for i in self.children:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 2.0 / 3 not in self.ratios_set:
-                i.make_down_fifth(self.root_note)
-
-    def execute_add_up_third(self, *args):
-        for i in self.children:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 1.25 not in self.ratios_set:
-                i.make_maj_third_up(self.root_note)
-
-    def execute_add_down_third(self, *args):
-        for i in self.children:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 0.8 not in self.ratios_set:
-                i.make_maj_third_down(self.root_note)
-
-    def execute_add_octave_up(self, *args):
-        for i in self.first_octave:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 2.0 not in self.ratios_set:
-                i.make_octave_up(self.root_note)
-
-    def execute_add_octave_down(self, *args):
-        for i in self.first_octave:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 0.5 not in self.ratios_set:
-                i.make_octave_down(self.root_note)
-
-    def execute_add_next_octave_up(self, *args):
-        self.temp_octave = self.next_octave
-        self.next_octave = set()
-        for i in self.temp_octave:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 2.0 not in self.ratios_set:
-                i.make_octave_up(self.root_note)
-
-    def execute_add_next_octave_down(self, *args):
-        self.temp_octave = self.next_octave
-        self.next_octave = set()
-        for i in self.temp_octave:
-            self.ratios_set.add(i.ratio)
-            if i.ratio * 0.5 not in self.ratios_set:
-                i.make_octave_down(self.root_note)
-
-    # decorations
-
-    def add_lines(self, *args):
-        '''Draws a line on self.canvas.before between any NotePoints related by a \
+    def add_lines(self):
+        """
+        Draws a line on self.canvas.before between any NotePoints related by a \
         Perfect Fifth or Major Third. \
-        A brighter line for the first octave, a darker one for the others.'''
+        A brighter line for the first octave, a darker one for the others.
+        """
         for item_x in self.children:
             for item_y in self.children:
                 for ratio_item in [1.5, 1.25]:
