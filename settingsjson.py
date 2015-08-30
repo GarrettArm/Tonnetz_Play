@@ -18,10 +18,10 @@ general_settings_json = json.dumps([
      'options': ['Major', 'Minor', 'Freehand']},
 
     {'type': 'bool',
-     'title': 'Complex',
-     'desc': 'Easy mode is "Off".  Options below only apply to "Complex On"',
+     'title': 'Easy Mode',
+     'desc': '',
      'section': 'General',
-     'key': 'complex'},
+     'key': 'easymode'},
 
     {'type': 'title',
      'title': 'Left Side'},

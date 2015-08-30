@@ -12,26 +12,23 @@ class FundMatrix(MatrixBase):
     def __init__(self, **kwargs):
         super(FundMatrix, self).__init__(**kwargs)
 
-    ratios_set = set()
-    first_octave_set = set()
-    next_octave_set = set()
-
     def set_tonality(self):
         """
         Assigns each FundMatrix NotePoint a tonality (Maj or Min), so that when we rebuild the MelodyMatrix it will be a Maj or Min chord.
         """
+        min_third = round(6.0 / 5, 3)
         fourth = 2.0 / 3
         sixth = round(5.0 / 6, 3)
-        min_third = 6.0 / 5
-        if self.gen_settings_items['scale'] == 'Major':
-            for i in self.children:
-                if i.ratio in [1, 1.5, fourth]:
-                    i.tonality = 'Major'
-                elif round(i.ratio, 3) in [2.25, 1.25, 1.875, sixth]:
-                    i.tonality = 'Minor'
-        elif self.gen_settings_items['scale'] == 'Minor':
-            for i in self.children:
-                if i.ratio in [1, 1.5, fourth, 2.25]:
-                    i.tonality = 'Minor'
-                elif i.ratio in [0.8, min_third, 1.8]:
-                    i.tonality = 'Major'
+
+        if self.gen_settings['scale'] == 'Major':
+            for child in self.children:
+                if child.ratio in {1, 1.5, fourth}:
+                    child.tonality = 'Major'
+                elif round(child.ratio, 3) in {2.25, 1.25, 1.875, sixth}:
+                    child.tonality = 'Minor'
+        elif self.gen_settings['scale'] == 'Minor':
+            for child in self.children:
+                if child.ratio in {1, 1.5, fourth, 2.25}:
+                    child.tonality = 'Minor'
+                elif round(child.ratio, 3) in {0.8, min_third, 1.8}:
+                    child.tonality = 'Major'

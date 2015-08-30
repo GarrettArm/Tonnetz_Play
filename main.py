@@ -1,8 +1,6 @@
 #!/bin/env python2.7
 # File name: main.py
 import kivy
-kivy.require('1.9.0')
-
 from kivy.app import App
 from kivy.uix.relativelayout import RelativeLayout
 
@@ -12,6 +10,8 @@ from fundscatterplane import FundScatterPlane
 from fundmatrix import FundMatrix
 from startscreen import StartScreen
 from settingsjson import general_settings_json
+
+kivy.require('1.9.0')
 
 
 class RootWidget(RelativeLayout):
@@ -61,7 +61,7 @@ class TonnetzPlayApp(App):
         config.setdefaults('General', {
             'key': 'C',
             'scale': 'Major',
-            'complex': u'0',
+            'easymode': u'1',
         })
 
     def build_settings(self, settings):
