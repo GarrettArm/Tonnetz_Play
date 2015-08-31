@@ -105,11 +105,11 @@ class MatrixBase(RelativeLayout):
             self.make_next_octaves()
 
         elif self.gen_settings['easymode'] == u'1':
-            if self.last_fund_note.tonality == 'Major':
+            if self.last_fund_tonality == 'Major':
                 for relation in ['fifths_up', 'thirds_up']:
                     self.create_next_notepoint(relation)
                 self.remove_top_third()
-            elif self.last_fund_note.tonality == 'Minor':
+            elif self.last_fund_tonality == 'Minor':
                 for relation in ['fifths_up', 'thirds_down']:
                     self.create_next_notepoint(relation)
                 self.remove_bottom_third()

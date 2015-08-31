@@ -16,9 +16,10 @@ class FundMatrix(MatrixBase):
         """
         Assigns each FundMatrix NotePoint a tonality (Maj or Min), so that when we rebuild the MelodyMatrix it will be a Maj or Min chord.
         """
-        min_third = round(6.0 / 5, 3)
+
         fourth = 2.0 / 3
         sixth = round(5.0 / 6, 3)
+        min_third = round(6.0 / 5, 3)
 
         if self.gen_settings['scale'] == 'Major':
             for child in self.children:
