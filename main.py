@@ -40,7 +40,7 @@ class TonnetzPlayApp(App):
 
     def build_config(self, config):
         """
-        kivy builtin.  Builds a tonnetzplay.ini config file if none exists
+        kivy builtin that builds a tonnetzplay.ini settings file if none exists
         """
         config.setdefaults('Fundamental', {
             'octaves_up': 2,
@@ -66,7 +66,7 @@ class TonnetzPlayApp(App):
 
     def build_settings(self, settings):
         """
-        kivy builtin that imports from a json file
+        kivy builtin that imports settings from a json file
         """
         settings.add_json_panel(
             'General Options', self.config, data=general_settings_json)
@@ -80,6 +80,25 @@ class TonnetzPlayApp(App):
                 instance.get_config_variables()
                 instance.redraw_layout()
 
+
+'''
+This is an explanation of kivy for those not familiar.
+In kivy, classes are initially instantiated based on the structure of the *.kv file.
+To inspect how the other classes in this program relate, pay attention to the indentations of the
+.kv file.
+TonnetzPlayApp is the overall App class which sets general program behavior.  It is outside the
+scope of the .kv file.
+RootWidget is the super-grandparent class, of which all other classes are children.
+canvas.before sets the screen background.
+Any line that ends with a ':' is a class instance.  It will have the default qualities of that
+class as found in the kivy API, unless overloaded by a class in this program.
+The child classes of the <RootWidget> are initiated by kivy and linked in a one parent to many
+children tree.
+Any classes defined outside the <RootWidget> tree within the .kv file are eligible for initiation,
+but are not initiated on program start.  For example, NotePoint objects are not initiated on
+program start; they are all initiated by the MelodyMatrix and FundMatrix objects.
+Any line in the .kv file with 'variable: value' is equivalent to self.variable = value.
+'''
 
 if __name__ == '__main__':
     TonnetzPlayApp().run()

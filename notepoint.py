@@ -25,62 +25,51 @@ class NotePoint(Widget):
         self.sound = None
         super(NotePoint, self).__init__(*args, **kwargs)
 
-    full_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    full_scale = [
+        'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
     def on_touch_down(self, touch):
-        for instance in App.get_running_app().root.walk(loopback=True):
-            if instance.__class__.__name__ == 'MelodyMatrix':
-                melodymatrix = instance
+        melodymatrix = self.find_melodymatrix()
         if self.collide_point(*touch.pos):
             if self.parent.__class__.__name__ == 'FundMatrix':
-                melodymatrix.last_fund_factors = self.factors
-                melodymatrix.last_fund_tonality = self.tonality
-                melodymatrix.last_fund_ratio = self.ratio
+                melodymatrix.update_globals_from_last_fund_notepoint(self)
                 melodymatrix.redraw_layout(text=self.text)
                 self.animate()
                 return super(NotePoint, self).on_touch_down(touch)
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
-                try:
+                if self.sound:
                     if self.sound.state == 'play':
                         return super(NotePoint, self).on_touch_down(touch)
-                except AttributeError:
-                    # notepoints have no attibute 'sound' until first play_sound()
-                    pass
                 self.play_sound()
                 self.animate()
                 return super(NotePoint, self).on_touch_down(touch)
 
     def on_touch_up(self, touch):
         if self.collide_point(*touch.pos):
-            try:
+            if self.sound:
                 self.sound.stop()
                 return super(NotePoint, self).on_touch_up(touch)
-            except AttributeError:
-                # notepoints have no attibute 'sound' until first play_sound()
-                pass
 
     def on_touch_move(self, touch):
-        for instance in App.get_running_app().root.walk(loopback=True):
-            if instance.__class__.__name__ == 'MelodyMatrix':
-                melodymatrix = instance
+        melodymatrix = self.find_melodymatrix()
         if self.collide_point(*touch.pos):
             if self.parent.__class__.__name__ == 'FundMatrix':
-                melodymatrix.last_fund_factors = self.factors
-                melodymatrix.last_fund_tonality = self.tonality
-                melodymatrix.last_fund_ratio = self.ratio
+                melodymatrix.update_globals_from_last_fund_notepoint(self)
                 melodymatrix.redraw_layout(text=self.text)
                 self.animate()
                 return super(NotePoint, self).on_touch_move(touch)
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
-                try:
+                if self.sound:
                     if self.sound.state == 'play':
                         return super(NotePoint, self).on_touch_move(touch)
-                except AttributeError:
-                    # notepoints have no attibute 'sound' until first play_sound()
-                    pass
                 self.play_sound()
                 self.animate()
         return super(NotePoint, self).on_touch_move(touch)
+
+    def find_melodymatrix(self):
+        for instance in App.get_running_app().root.walk(loopback=True):
+            if instance.__class__.__name__ == 'MelodyMatrix':
+                return instance
 
     def animate(self):
         if not self.pressed:
@@ -99,39 +88,51 @@ class NotePoint(Widget):
         self.pressed = False
 
     def play_sound(self):
-        final_pitch = self.calculate_pitch()
-        soundfile = 'wavs/' + final_pitch + '.wav'
-        self.sound = SoundLoader.load(soundfile)
+        filename = self.convert_factors_to_filename()
+        path_filename_extension = 'wavs/{}.wav'.format(filename)
+        self.sound = SoundLoader.load(path_filename_extension)
         self.sound.loop = True
         self.sound.play()
 
-    def calculate_pitch(self):
-        key_index = self.full_scale.index(self.parent.gen_settings['key'])
-        summed_relations = {
-            k: self.factors[k] + self.parent.last_fund_factors[k] for k in self.factors}
-        summed_index = key_index + \
-            summed_relations['octaves'] * 12 + \
-            summed_relations['fifths'] * 7 + \
-            summed_relations['thirds'] * 4
+    def convert_factors_to_filename(self):
+        octave, note_position = self.sum_all_factors()
+        octave = self.clamp(2, octave, 8)
+        return '{}{}'.format(self.full_scale[note_position], octave)
 
-        new_name_suffix = 4
-        while summed_index > 11:
-            new_name_suffix += 1
-            summed_index -= 12
-        while summed_index < 0:
-            new_name_suffix -= 1
-            summed_index += 12
-        if new_name_suffix > 8:
-            new_name_suffix = 8
-        if new_name_suffix < 2:
-            new_name_suffix = 2
+    def sum_all_factors(self):
+        # key in the musical sense (i.e., C#, A, etc.)
+        # index in the normal sense of position within a list
+        musical_key = self.parent.general_settings['key']
+        index_of_key = self.full_scale.index(musical_key)
+        index_of_middle_C = 48          # 4 octaves, note 0
+        summed_factors_dict = self.add_two_dicts_values(self.factors, self.parent.last_fund_factors)
+        sum_of_all_factors = (
+            index_of_key +
+            index_of_middle_C +
+            self.adjustment_for_relation(summed_factors_dict, 'octaves', 12) +
+            self.adjustment_for_relation(summed_factors_dict, 'fifths', 7) +
+            self.adjustment_for_relation(summed_factors_dict, 'thirds', 4)
+        )
+        return divmod(sum_of_all_factors, 12)
 
-        new_name_prefix = self.full_scale[summed_index]
-        return new_name_prefix + str(new_name_suffix)
+    def add_two_dicts_values(self, dict_a, dict_b):
+        try:
+            assert set(dict_a) == set(dict_b)
+            return {k: dict_a[k] + dict_b[k] for k in dict_a}
+        except AssertionError:
+            'Arguments dict_a and dict_b should have the same keys.'
+
+    def adjustment_for_relation(self, dictionary, relation, step):
+        # summed_factors_dict['octaves'] == 2 returns the integer 24.
+        return dictionary[relation] * step
+
+    def clamp(self, low, value, high):
+        # try to break this out of the class
+        return min(max(low, value), high)
 
     def make_related_note(self, relation):
         """
-        Makes one new NotePoint object, using two arguments: the passed NotePoint object, and the relation between the passed NotePoint and the one to be made.
+        Makes one new NotePoint object, using two arguments: the referenced NotePoint object, and the relation between that NotePoint and the Notepoint to be made.
         """
 
         thirds_cycle = [
@@ -199,4 +200,5 @@ class NotePoint(Widget):
         l.center = self.center
         l.text = self.text
         l.font_size = 22
+
         self.add_widget(l)
