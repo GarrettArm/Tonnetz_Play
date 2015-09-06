@@ -156,7 +156,7 @@ class NotePoint(Widget):
         new_note.ratio = self.assign_new_note_ratio(multiplier)
         new_note.factors_dict = self.assign_new_note_factors_dict(
             distance, direction)
-        new_note.text = self.assign_new_note_text(distance, direction)
+        new_note.text = self.assign_new_note_text(relation)
         new_note.tonality = self.assign_new_note_tonality(distance)
         self.parent.add_widget(new_note)
         new_note.attach_label()
@@ -179,42 +179,20 @@ class NotePoint(Widget):
             new_factors_dict[distance] -= 1
         return new_factors_dict
 
-    def assign_new_note_text(self, distance, direction):
-
-        # this code could be MUCH simpler
-
-        thirds_cycle = [['C', 'E', 'G#'], ['D#', 'G', 'B'], ['D', 'F#', 'A#'], ['C#', 'F', 'A']]
-        fifths_cycle = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F']
-
-        if distance == 'octaves':
-            new_text = self.text
-
-        elif distance == 'thirds':
-            for i in xrange(4):
-                if self.text in thirds_cycle[i]:
-                    if direction == 'down':
-                        if self.text in thirds_cycle[i]:
-                            new_text = thirds_cycle[i][
-                                thirds_cycle[i].index(self.text) - 1]
-                    elif direction == 'up':
-                        if thirds_cycle[i].index(self.text) == len(thirds_cycle[i]) - 1:
-                            new_text = thirds_cycle[i][0]
-                        else:
-                            new_text = thirds_cycle[i][
-                                thirds_cycle[i].index(self.text) + 1]
-
-        elif distance == 'fifths':
-            if direction == 'down':
-                new_text = fifths_cycle[
-                    fifths_cycle.index(self.text) - 1]
-            elif direction == 'up':
-                if fifths_cycle.index(self.text) == len(fifths_cycle) - 1:
-                    new_text = fifths_cycle[0]
-                else:
-                    new_text = fifths_cycle[
-                        fifths_cycle.index(self.text) + 1]
-
-        return new_text
+    def assign_new_note_text(self, relation):
+        relations_steps = {
+            'octaves_up': 12,
+            'octaves_down': -12,
+            'thirds_up': 4,
+            'thirds_down': -4,
+            'fifths_up': 7,
+            'fifths_down': -7
+        }
+        original_text_index = self.full_scale.index(self.text)
+        shift_by = relations_steps[relation]
+        adjusted_note_index = original_text_index + shift_by
+        octave, adjusted_note_index = divmod(adjusted_note_index, 12)
+        return self.full_scale[adjusted_note_index]
 
     def assign_new_note_tonality(self, distance):
         if distance == 'octaves':
