@@ -55,7 +55,6 @@ class NotePoint(Widget):
         if self.collide_point(*touch.pos):
             if self.parent.__class__.__name__ == 'FundMatrix':
                 self.on_fund_notepoint_touch()
-                print(self.tonality)
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
                 self.on_melody_notepoint_touch()
         return super(NotePoint, self).on_touch_move(touch)
@@ -191,7 +190,7 @@ class NotePoint(Widget):
         original_text_index = self.full_scale.index(self.text)
         shift_by = relations_steps[relation]
         adjusted_note_index = original_text_index + shift_by
-        octave, adjusted_note_index = divmod(adjusted_note_index, 12)
+        adjusted_note_index = adjusted_note_index % 12
         return self.full_scale[adjusted_note_index]
 
     def assign_new_note_tonality(self, distance):
