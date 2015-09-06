@@ -21,7 +21,7 @@ class MatrixBase(RelativeLayout):
     melody_settings = {}
 
     # attributes of the last-touched fundmatrix notepoint
-    last_fund_factors = {'octaves': 0, 'fifths': 0, 'thirds': 0}
+    last_fund_factors_dict = {'octaves': 0, 'fifths': 0, 'thirds': 0}
     last_fund_tonality = None
     last_fund_ratio = None
 
@@ -46,24 +46,23 @@ class MatrixBase(RelativeLayout):
         """
         Imports the latest config variables from the ini file.
         """
-
         current_ini = App.get_running_app().get_application_config()
         settings = ConfigParser()
         settings.read(current_ini)
+        self.register_settings(settings)
 
+    def register_settings(self, settings):
         for k, v in settings.items('General'):
             self.general_settings[k] = v
         for k, v in settings.items('Fundamental'):
             self.fund_settings[k] = v
         for k, v in settings.items('Melody'):
             self.melody_settings[k] = v
-
         self.last_fund_tonality = self.general_settings['scale']
         self.key = self.general_settings['key']
         self.ratio = 1
 
     def redraw_layout(self, **kwargs):
-
         if 'text' in kwargs:
             text = kwargs['text']
         else:
@@ -93,7 +92,7 @@ class MatrixBase(RelativeLayout):
         a.text = text
         a.center = [200, 200]
         a.ratio = 1
-        a.factors = {'octaves': 0, 'fifths': 0, 'thirds': 0}
+        a.factors_dict = {'octaves': 0, 'fifths': 0, 'thirds': 0}
         a.tonality = self.general_settings['scale']
         a.attach_label()
 
@@ -244,6 +243,6 @@ class MatrixBase(RelativeLayout):
         Receives a call from a FundMatrix NotePoint with the calling NotePoint as an argument.
         Updates the registry of attributes of the last-touch notepoint.
         '''
-        self.last_fund_factors = notepoint.factors
+        self.last_fund_factors_dict = notepoint.factors_dict
         self.last_fund_tonality = notepoint.tonality
         self.last_fund_ratio = notepoint.ratio

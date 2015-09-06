@@ -28,48 +28,58 @@ class NotePoint(Widget):
     full_scale = [
         'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-    def on_touch_down(self, touch):
-        melodymatrix = self.find_melodymatrix()
-        if self.collide_point(*touch.pos):
-            if self.parent.__class__.__name__ == 'FundMatrix':
-                melodymatrix.update_globals_from_last_fund_notepoint(self)
-                melodymatrix.redraw_layout(text=self.text)
-                self.animate()
-                return super(NotePoint, self).on_touch_down(touch)
-            elif self.parent.__class__.__name__ == 'MelodyMatrix':
-                if self.sound:
-                    if self.sound.state == 'play':
-                        return super(NotePoint, self).on_touch_down(touch)
-                self.play_sound()
-                self.animate()
-                return super(NotePoint, self).on_touch_down(touch)
+    relations_key = {
+        'octaves_up':   [2.0,       0,  100],
+        'octaves_down': [0.5,       0, -100],
+        'thirds_up':    [1.25,   -105,   33.3],
+        'thirds_down':  [0.8,     105,  -33.3],
+        'fifths_up':    [1.5,      38,   58.3],
+        'fifths_down':  [2.0 / 3, -38,  -58.3]
+    }
 
     def on_touch_up(self, touch):
         if self.collide_point(*touch.pos):
             if self.sound:
                 self.sound.stop()
-                return super(NotePoint, self).on_touch_up(touch)
+        return super(NotePoint, self).on_touch_up(touch)
 
-    def on_touch_move(self, touch):
-        melodymatrix = self.find_melodymatrix()
+    def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
             if self.parent.__class__.__name__ == 'FundMatrix':
-                melodymatrix.update_globals_from_last_fund_notepoint(self)
-                melodymatrix.redraw_layout(text=self.text)
-                self.animate()
-                return super(NotePoint, self).on_touch_move(touch)
+                self.on_fund_notepoint_touch()
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
-                if self.sound:
-                    if self.sound.state == 'play':
-                        return super(NotePoint, self).on_touch_move(touch)
-                self.play_sound()
-                self.animate()
+                self.on_melody_notepoint_touch()
+        return super(NotePoint, self).on_touch_down(touch)
+
+    def on_touch_move(self, touch):
+        if self.collide_point(*touch.pos):
+            if self.parent.__class__.__name__ == 'FundMatrix':
+                self.on_fund_notepoint_touch()
+                print(self.tonality)
+            elif self.parent.__class__.__name__ == 'MelodyMatrix':
+                self.on_melody_notepoint_touch()
         return super(NotePoint, self).on_touch_move(touch)
+
+    def on_fund_notepoint_touch(self):
+        melodymatrix = self.find_melodymatrix()
+        melodymatrix.update_globals_from_last_fund_notepoint(self)
+        melodymatrix.redraw_layout(text=self.text)
+        self.animate()
 
     def find_melodymatrix(self):
         for instance in App.get_running_app().root.walk(loopback=True):
             if instance.__class__.__name__ == 'MelodyMatrix':
                 return instance
+
+    def on_melody_notepoint_touch(self):
+        if self.is_stopped_or_not_initialized():
+            self.play_sound()
+            self.animate()
+
+    def is_stopped_or_not_initialized(self):
+        if not self.sound or self.sound.state == 'stop':
+            return True
+        return False
 
     def animate(self):
         if not self.pressed:
@@ -105,7 +115,8 @@ class NotePoint(Widget):
         musical_key = self.parent.general_settings['key']
         index_of_key = self.full_scale.index(musical_key)
         index_of_middle_C = 48          # 4 octaves, note 0
-        summed_factors_dict = self.add_two_dicts_values(self.factors, self.parent.last_fund_factors)
+        summed_factors_dict = self.add_two_dicts_values(
+            self.factors_dict, self.parent.last_fund_factors_dict)
         sum_of_all_factors = (
             index_of_key +
             index_of_middle_C +
@@ -122,83 +133,105 @@ class NotePoint(Widget):
         except AssertionError:
             'Arguments dict_a and dict_b should have the same keys.'
 
-    def adjustment_for_relation(self, dictionary, relation, step):
-        # summed_factors_dict['octaves'] == 2 returns the integer 24.
-        return dictionary[relation] * step
+    def adjustment_for_relation(self, summed_factors_dict, relation, step):
+        # (summed_factors_dict['octaves'] == 2) * 12 returns the integer 24.
+        return summed_factors_dict[relation] * step
 
     def clamp(self, low, value, high):
         # try to break this out of the class
         return min(max(low, value), high)
 
+    # note to self:  try to move the following defs into their own 'notepoint
+    # factory' class.
+
     def make_related_note(self, relation):
         """
-        Makes one new NotePoint object, using two arguments: the referenced NotePoint object, and the relation between that NotePoint and the Notepoint to be made.
+        Makes one new NotePoint object, using two arguments: the referenced NotePoint object, and the relation between that NotePoint and the new Notepoint to be made.
         """
-
-        thirds_cycle = [
-            ['C', 'E', 'G#'], ['D#', 'G', 'B'], ['D', 'F#', 'A#'], ['C#', 'F', 'A']]
-        fifths_cycle = [
-            'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F']
-        relations_key = {
-            'octaves_up':   [2.0,       0,  100],
-            'octaves_down': [0.5,       0, -100],
-            'thirds_up':    [1.25,   -105,   33.3],
-            'thirds_down':  [0.8,     105,  -33.3],
-            'fifths_up':    [1.5,      38,   58.3],
-            'fifths_down':  [2.0 / 3, -38,  -58.3]
-        }
-        multiplier, move_x, move_y = relations_key[relation]
         distance, direction = relation.split('_')
+        multiplier, move_x, move_y = self.relations_key[relation]
 
         new_note = NotePoint()
-        new_note.center = [self.center_x + move_x,
-                           self.center_y + move_y]
-        new_note.ratio = self.ratio * multiplier
-        new_note.factors = dict(self.factors)
+        new_note.center = self.assign_new_note_center(move_x, move_y)
+        new_note.ratio = self.assign_new_note_ratio(multiplier)
+        new_note.factors_dict = self.assign_new_note_factors_dict(
+            distance, direction)
+        new_note.text = self.assign_new_note_text(distance, direction)
+        new_note.tonality = self.assign_new_note_tonality(distance)
+        self.parent.add_widget(new_note)
+        new_note.attach_label()
+        self.register_new_note(new_note, distance)
 
+    def assign_new_note_center(self, move_x, move_y):
+        new_center = [self.center_x + move_x,
+                      self.center_y + move_y]
+        return new_center
+
+    def assign_new_note_ratio(self, multiplier):
+        new_ratio = self.ratio * multiplier
+        return new_ratio
+
+    def assign_new_note_factors_dict(self, distance, direction):
+        new_factors_dict = dict(self.factors_dict)
         if direction == 'up':
-            new_note.factors[distance] += 1
+            new_factors_dict[distance] += 1
         elif direction == 'down':
-            new_note.factors[distance] -= 1
+            new_factors_dict[distance] -= 1
+        return new_factors_dict
+
+    def assign_new_note_text(self, distance, direction):
+
+        # this code could be MUCH simpler
+
+        thirds_cycle = [['C', 'E', 'G#'], ['D#', 'G', 'B'], ['D', 'F#', 'A#'], ['C#', 'F', 'A']]
+        fifths_cycle = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F']
+
         if distance == 'octaves':
-            new_note.text = self.text
-            new_note.tonality = self.tonality
+            new_text = self.text
+
         elif distance == 'thirds':
             for i in xrange(4):
                 if self.text in thirds_cycle[i]:
                     if direction == 'down':
                         if self.text in thirds_cycle[i]:
-                            new_note.text = thirds_cycle[i][
+                            new_text = thirds_cycle[i][
                                 thirds_cycle[i].index(self.text) - 1]
                     elif direction == 'up':
                         if thirds_cycle[i].index(self.text) == len(thirds_cycle[i]) - 1:
-                            new_note.text = thirds_cycle[i][0]
+                            new_text = thirds_cycle[i][0]
                         else:
-                            new_note.text = thirds_cycle[i][
+                            new_text = thirds_cycle[i][
                                 thirds_cycle[i].index(self.text) + 1]
+
         elif distance == 'fifths':
             if direction == 'down':
-                new_note.text = fifths_cycle[
+                new_text = fifths_cycle[
                     fifths_cycle.index(self.text) - 1]
             elif direction == 'up':
                 if fifths_cycle.index(self.text) == len(fifths_cycle) - 1:
-                    new_note.text = fifths_cycle[0]
+                    new_text = fifths_cycle[0]
                 else:
-                    new_note.text = fifths_cycle[
+                    new_text = fifths_cycle[
                         fifths_cycle.index(self.text) + 1]
-        self.parent.add_widget(new_note)
-        new_note.attach_label()
 
-        if distance == 'octave':
-            self.parent.next_octave_set.add(new_note)
-        self.parent.ratios_set.add(new_note.ratio)
+        return new_text
 
-    def attach_label(self, *args):
+    def assign_new_note_tonality(self, distance):
+        if distance == 'octaves':
+            return self.tonality
+        else:
+            pass
+
+    def attach_label(self):
         l = NotePointLabel()
         l.color = [1, .89, .355, 1]
         l.size = self.size
         l.center = self.center
         l.text = self.text
         l.font_size = 22
-
         self.add_widget(l)
+
+    def register_new_note(self, new_note, distance):
+        if distance == 'octave':
+            self.parent.next_octave_set.add(new_note)
+        self.parent.ratios_set.add(new_note.ratio)

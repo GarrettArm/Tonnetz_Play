@@ -13,7 +13,7 @@ class MelodyScatter(Scatter):
             self.do_scale = True
             self.do_translation = True
             return True
-        if state == 'down':
+        elif state == 'down':
             self.do_scale = False
             self.do_translation = False
             return True
