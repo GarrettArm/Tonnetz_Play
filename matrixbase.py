@@ -11,7 +11,8 @@ from notepoint import NotePoint
 class MatrixBase(RelativeLayout):
 
     """
-    Base class for MelodyMatrix and FundMatrix.
+    Base class for MelodyMatrix and FundMatrix.  Each of these classes has a single
+    function to serve as a space for hosting a grid of NotePoint objects.    
     """
 
     # app config settings
@@ -88,6 +89,10 @@ class MatrixBase(RelativeLayout):
         self.ratios_set, self.first_octave_set, self.next_octave_set = set(), set(), set()
 
     def make_first_notepoint(self, text):
+        """
+        FundMatrix and MelodyMatrix must instantiate one NotePoint object each.  
+        Afterward, the *Matrix classes can 
+        """
         a = NotePoint()
         a.text = text
         a.center = [200, 200]
@@ -159,7 +164,6 @@ class MatrixBase(RelativeLayout):
                 count += 1
 
     def which_class_settings_to_use(self):
-
         if self.__class__.__name__ == 'FundMatrix':
             return self.fund_settings
         elif self.__class__.__name__ == 'MelodyMatrix':
@@ -209,7 +213,6 @@ class MatrixBase(RelativeLayout):
         """
         Removes a NotePoint, specifically the bottom right one
         """
-
         rounded_ratios_set = [round(ratio, 3) for ratio in self.ratios_set]
 
         for child in self.children:

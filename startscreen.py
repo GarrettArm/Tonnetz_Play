@@ -10,3 +10,4 @@ class StartScreen(Popup):
 
     def on_touch_down(self, *args, **kwargs):
         self.parent.remove_widget(self)
+        return True

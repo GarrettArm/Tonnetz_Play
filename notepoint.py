@@ -25,10 +25,9 @@ class NotePoint(Widget):
         self.sound = None
         super(NotePoint, self).__init__(*args, **kwargs)
 
-    full_scale = [
-        'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    full_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-    relations_key = {
+    relations_mult_movex_movey = {
         'octaves_up':   [2.0,       0,  100],
         'octaves_down': [0.5,       0, -100],
         'thirds_up':    [1.25,   -105,   33.3],
@@ -125,30 +124,36 @@ class NotePoint(Widget):
         )
         return divmod(sum_of_all_factors, 12)
 
-    def add_two_dicts_values(self, dict_a, dict_b):
+    @staticmethod
+    def add_two_dicts_values(dict_a, dict_b):
         try:
             assert set(dict_a) == set(dict_b)
             return {k: dict_a[k] + dict_b[k] for k in dict_a}
         except AssertionError:
             'Arguments dict_a and dict_b should have the same keys.'
 
-    def adjustment_for_relation(self, summed_factors_dict, relation, step):
+    @staticmethod
+    def adjustment_for_relation(summed_factors_dict, relation, step):
         # (summed_factors_dict['octaves'] == 2) * 12 returns the integer 24.
         return summed_factors_dict[relation] * step
 
-    def clamp(self, low, value, high):
+    @staticmethod
+    def clamp(low, value, high):
         # try to break this out of the class
         return min(max(low, value), high)
 
     # note to self:  try to move the following defs into their own 'notepoint
-    # factory' class.
+    # factory' class.  Another (possibly better) idea is to move all the following into
+    # the MatrixBase class.  Look into whether there are any requirement that tie these
+    # functions to this class.  Structurally, it seems to me the functions are more tied
+    # to the MatrixBase.create_next_notepoint(), etc.
 
     def make_related_note(self, relation):
         """
         Makes one new NotePoint object, using two arguments: the referenced NotePoint object, and the relation between that NotePoint and the new Notepoint to be made.
         """
         distance, direction = relation.split('_')
-        multiplier, move_x, move_y = self.relations_key[relation]
+        multiplier, move_x, move_y = self.relations_mult_movex_movey[relation]
 
         new_note = NotePoint()
         new_note.center = self.assign_new_note_center(move_x, move_y)
