@@ -13,7 +13,8 @@ class MatrixBase(RelativeLayout):
 
     """
     Base class for MelodyMatrix and FundMatrix.  Each of these classes has a single
-    function to serve as a space for hosting a grid of NotePoint objects.    
+    function to serve as a space for hosting a grid of NotePoint objects.  This class is
+    the sole class responsible for creating and manipulating all NotePoint objects.    
     """
 
     # app config settings

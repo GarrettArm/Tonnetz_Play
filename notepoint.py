@@ -142,68 +142,6 @@ class NotePoint(Widget):
         # try to break this out of the class
         return min(max(low, value), high)
 
-    # note to self:  try to move the following defs into their own 'notepoint
-    # factory' class.  Another (possibly better) idea is to move all the following into
-    # the MatrixBase class.  Look into whether there are any requirement that tie these
-    # functions to this class.  Structurally, it seems to me the functions are more tied
-    # to the MatrixBase.create_next_notepoint(), etc.
-
-    def make_related_note(self, relation):
-        """
-        Makes one new NotePoint object, using two arguments: the referenced NotePoint object, and the relation between that NotePoint and the new Notepoint to be made.
-        """
-        distance, direction = relation.split('_')
-        multiplier, move_x, move_y = self.relations_mult_movex_movey[relation]
-
-        new_note = NotePoint()
-        new_note.center = self.assign_new_note_center(move_x, move_y)
-        new_note.ratio = self.assign_new_note_ratio(multiplier)
-        new_note.factors_dict = self.assign_new_note_factors_dict(
-            distance, direction)
-        new_note.text = self.assign_new_note_text(relation)
-        new_note.tonality = self.assign_new_note_tonality(distance)
-        self.parent.add_widget(new_note)
-        new_note.attach_label()
-        self.register_new_note(new_note, distance)
-
-    def assign_new_note_center(self, move_x, move_y):
-        new_center = [self.center_x + move_x,
-                      self.center_y + move_y]
-        return new_center
-
-    def assign_new_note_ratio(self, multiplier):
-        new_ratio = self.ratio * multiplier
-        return new_ratio
-
-    def assign_new_note_factors_dict(self, distance, direction):
-        new_factors_dict = dict(self.factors_dict)
-        if direction == 'up':
-            new_factors_dict[distance] += 1
-        elif direction == 'down':
-            new_factors_dict[distance] -= 1
-        return new_factors_dict
-
-    def assign_new_note_text(self, relation):
-        relations_steps = {
-            'octaves_up': 12,
-            'octaves_down': -12,
-            'thirds_up': 4,
-            'thirds_down': -4,
-            'fifths_up': 7,
-            'fifths_down': -7
-        }
-        original_text_index = self.full_scale.index(self.text)
-        shift_by = relations_steps[relation]
-        adjusted_note_index = original_text_index + shift_by
-        adjusted_note_index = adjusted_note_index % 12
-        return self.full_scale[adjusted_note_index]
-
-    def assign_new_note_tonality(self, distance):
-        if distance == 'octaves':
-            return self.tonality
-        else:
-            pass
-
     def attach_label(self):
         l = NotePointLabel()
         l.color = [1, .89, .355, 1]
@@ -212,8 +150,3 @@ class NotePoint(Widget):
         l.text = self.text
         l.font_size = 22
         self.add_widget(l)
-
-    def register_new_note(self, new_note, distance):
-        if distance == 'octave':
-            self.parent.next_octave_set.add(new_note)
-        self.parent.ratios_set.add(new_note.ratio)
