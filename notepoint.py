@@ -1,46 +1,46 @@
 # File name: notepoint.py
+# -*- coding: utf-8 -*-
 
-from __future__ import division
-
-from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.uix.label import Label
 from kivy.animation import Animation
+from kivy.app import App
 from kivy.core.audio import SoundLoader
+from kivy.uix.label import Label
+from kivy.uix.widget import Widget
 
 
 class NotePointLabel(Label):
 
     def __init__(self, *args, **kwargs):
-        super(NotePointLabel, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class NotePoint(Widget):
 
     def __init__(self, *args, **kwargs):
         self.pressed = False
-        self.size = [50, 50]
+        self.size = [20, 20]
         self.color = [0.586, 0.45, 0.265, .9]
         self.tonality = None
         self.sound = None
-        super(NotePoint, self).__init__(*args, **kwargs)
+        self.ratio = None
+        super().__init__(*args, **kwargs)
 
     full_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
     relations_mult_movex_movey = {
-        'octaves_up':   [2.0,       0,  100],
-        'octaves_down': [0.5,       0, -100],
-        'thirds_up':    [1.25,   -105,   33.3],
-        'thirds_down':  [0.8,     105,  -33.3],
-        'fifths_up':    [1.5,      38,   58.3],
-        'fifths_down':  [2.0 / 3, -38,  -58.3]
+        'octaves_up': [2.0, 0, 100],
+        'octaves_down': [0.5, 0, -100],
+        'thirds_up': [1.25, -105, 33.3],
+        'thirds_down': [0.8, 105, -33.3],
+        'fifths_up': [1.5, 38, 58.3],
+        'fifths_down': [2.0 / 3, -38, -58.3]
     }
 
     def on_touch_up(self, touch):
         if self.collide_point(*touch.pos):
             if self.sound:
                 self.sound.stop()
-        return super(NotePoint, self).on_touch_up(touch)
+        return super().on_touch_up(touch)
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
@@ -48,7 +48,7 @@ class NotePoint(Widget):
                 self.on_fund_notepoint_touch()
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
                 self.on_melody_notepoint_touch()
-        return super(NotePoint, self).on_touch_down(touch)
+        return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
         if self.collide_point(*touch.pos):
@@ -56,7 +56,7 @@ class NotePoint(Widget):
                 self.on_fund_notepoint_touch()
             elif self.parent.__class__.__name__ == 'MelodyMatrix':
                 self.on_melody_notepoint_touch()
-        return super(NotePoint, self).on_touch_move(touch)
+        return super().on_touch_move(touch)
 
     def on_fund_notepoint_touch(self):
         melodymatrix = self.find_melodymatrix()
@@ -85,9 +85,9 @@ class NotePoint(Widget):
             self.out_pos = [self.center_x - 2, self.center_y - 2]
             self.home_pos = [self.x, self.y]
             anim_in = Animation(center=self.out_pos, color=(0, 0, 0, 1),
-                                size=(self.size[0] * 1.25, self.size[1] * 1.25),  d=0.02)
+                                size=(self.size[0] * 1.25, self.size[1] * 1.25), d=0.02)
             anim_out = Animation(pos=self.home_pos, color=self.color,
-                                 size=(self.size[0], self.size[1]),  d=0.02)
+                                 size=(self.size[0], self.size[1]), d=0.02)
             anim = anim_in + anim_out
             anim.bind(on_complete=self.reset_anim)
             anim.start(self)
@@ -139,14 +139,13 @@ class NotePoint(Widget):
 
     @staticmethod
     def clamp(low, value, high):
-        # try to break this out of the class
         return min(max(low, value), high)
 
     def attach_label(self):
-        l = NotePointLabel()
-        l.color = [1, .89, .355, 1]
-        l.size = self.size
-        l.center = self.center
-        l.text = self.text
-        l.font_size = 22
-        self.add_widget(l)
+        label = NotePointLabel()
+        label.color = [1, .89, .355, 1]
+        label.size = self.size
+        label.center = self.center
+        label.text = self.text
+        label.font_size = 30
+        self.add_widget(label)

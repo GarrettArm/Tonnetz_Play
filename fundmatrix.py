@@ -1,4 +1,5 @@
 # File name: fundmatrix.py
+# -*- coding: utf-8 -*-
 
 from matrixbase import MatrixBase
 
@@ -13,7 +14,7 @@ class FundMatrix(MatrixBase):
     """
 
     def __init__(self, **kwargs):
-        super(FundMatrix, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def set_tonality(self):
         """
@@ -21,9 +22,9 @@ class FundMatrix(MatrixBase):
         we rebuild the MelodyMatrix it will be a Maj or Min chord.
         """
 
-        fourth = 2.0 / 3
-        sixth = round(5.0 / 6, 3)
-        min_third = round(6.0 / 5, 3)
+        fourth = 2 / 3
+        sixth = round(5 / 6, 3)
+        min_third = round(6 / 5, 3)
 
         if self.general_settings['scale'] == 'Major':
             for child in self.children:

@@ -1,23 +1,20 @@
-#!/bin/env python2.7
-# File name: main.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import kivy
 from kivy.app import App
 from kivy.uix.relativelayout import RelativeLayout
 
-from melodyscatter import MelodyScatter
-from melodymatrix import MelodyMatrix
-from fundscatterplane import FundScatterPlane
-from fundmatrix import FundMatrix
-from startscreen import StartScreen
 from settingsjson import general_settings_json
+from startscreen import StartScreen
 
-kivy.require('1.9.0')
+kivy.require('1.10.0')
 
 
 class RootWidget(RelativeLayout):
 
     def __init__(self, **kwargs):
-        super(RootWidget, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def open_startscreen(self):
         a = StartScreen()
@@ -27,7 +24,7 @@ class RootWidget(RelativeLayout):
 class TonnetzPlayApp(App):
 
     def __init__(self, **kwargs):
-        super(TonnetzPlayApp, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def build(self):
         """
@@ -35,7 +32,6 @@ class TonnetzPlayApp(App):
         """
         self.title = "Tonnetz Play"
         self.use_kivy_settings = False
-        config = self.config
         return RootWidget()
 
     def build_config(self, config):
@@ -61,8 +57,9 @@ class TonnetzPlayApp(App):
         config.setdefaults('General', {
             'key': 'C',
             'scale': 'Major',
-            'easymode': u'1',
+            'easymode': '1',
         })
+
 
     def build_settings(self, settings):
         """

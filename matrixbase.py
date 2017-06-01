@@ -1,9 +1,10 @@
 # File name: matrixbase.py
+# -*- coding: utf-8 -*-
 
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.config import ConfigParser
 from kivy.app import App
+from kivy.config import ConfigParser
 from kivy.graphics import Line, Color
+from kivy.uix.relativelayout import RelativeLayout
 
 from notepoint import NotePoint
 from notepoint import NotePointLabel
@@ -31,25 +32,24 @@ class MatrixBase(RelativeLayout):
     # variables used in making next notepoints, next octaves
     ratios_set, first_octave_set, next_octave_set = set(), set(), set()
     relations_multiplier = {
-        'octaves_up':   2.0,
+        'octaves_up':   2,
         'octaves_down': 0.5,
         'thirds_up':    1.25,
         'thirds_down':  0.8,
         'fifths_up':    1.5,
-        'fifths_down':  2.0 / 3
+        'fifths_down':  2 / 3
     }
     relations_mult_addx_addy = {
-        'octaves_up':   [2.0,       0,  100],
+        'octaves_up':   [2,       0,  100],
         'octaves_down': [0.5,       0, -100],
         'thirds_up':    [1.25,   -105,   33.3],
         'thirds_down':  [0.8,     105,  -33.3],
         'fifths_up':    [1.5,      38,   58.3],
-        'fifths_down':  [2.0 / 3, -38,  -58.3]
+        'fifths_down':  [2 / 3, -38,  -58.3]
     }
 
-
     def __init__(self, **kwargs):
-        super(RelativeLayout, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.get_config_variables()
         self.redraw_layout(text=self.key)
 
@@ -74,11 +74,7 @@ class MatrixBase(RelativeLayout):
         self.ratio = 1
 
     def redraw_layout(self, **kwargs):
-        if 'text' in kwargs:
-            text = kwargs['text']
-        else:
-            text = self.key
-
+        text = kwargs.get('text', self.key)
         self.clear_layout()
         self.make_first_notepoint(text)
         self.populate_first_octave()
@@ -124,7 +120,7 @@ class MatrixBase(RelativeLayout):
 
         if self.general_settings['scale'] == 'Freehand':
             for relation in ['fifths_up', 'fifths_down', 'thirds_up', 'thirds_down']:
-                for n in xrange(int(settings_dict[relation])):
+                for n in range(int(settings_dict[relation])):
                     self.create_next_notepoint(relation)
 
         elif self.general_settings['easymode'] == u'0' or self.__class__.__name__ == 'FundMatrix':
@@ -241,15 +237,15 @@ class MatrixBase(RelativeLayout):
         """
         for notepoint_x in self.children:
             for notepoint_y in self.children:
-                for fifth_or_third in {1.5, 1.25}:
+                for fifth_or_third in (1.5, 1.25):
                     if round(notepoint_x.ratio, 3) == round(notepoint_y.ratio / fifth_or_third, 3):
                         with self.canvas.before:
                             if notepoint_x in self.first_octave_set:
                                 Color(1, 1, 1, 1)
                             else:
                                 Color(0.6, 0.6, 0.6, 1)
-                            Line(points=[notepoint_x.center[0], notepoint_x.center[1],
-                                         notepoint_y.center[0], notepoint_y.center[1]], width=1.25)
+                            Line(points=[notepoint_x.center_x, notepoint_x.center_y,
+                                         notepoint_y.center_x, notepoint_y.center_y], width=3)
 
     def make_related_note(self, notepoint, relation):
         """

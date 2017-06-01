@@ -1,4 +1,5 @@
 # File name: melodymatrix.py
+# -*- coding: utf-8 -*-
 
 from matrixbase import MatrixBase
 
@@ -13,7 +14,7 @@ class MelodyMatrix(MatrixBase):
     """
 
     def __init__(self, **kwargs):
-        super(MelodyMatrix, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def silence(self):
         for child in self.children:
