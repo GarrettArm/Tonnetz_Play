@@ -1,6 +1,3 @@
-# File name: fundmatrix.py
-# -*- coding: utf-8 -*-
-
 from matrixbase import MatrixBase
 
 

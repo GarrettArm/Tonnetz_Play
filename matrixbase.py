@@ -1,6 +1,3 @@
-# File name: matrixbase.py
-# -*- coding: utf-8 -*-
-
 from kivy.app import App
 from kivy.config import ConfigParser
 from kivy.graphics import Line, Color
@@ -15,7 +12,7 @@ class MatrixBase(RelativeLayout):
     """
     Base class for MelodyMatrix and FundMatrix.  Each of these classes has a single
     function to serve as a space for hosting a grid of NotePoint objects.  This class is
-    the sole class responsible for creating and manipulating all NotePoint objects.    
+    the sole class responsible for creating and manipulating all NotePoint objects.
     """
 
     # app config settings
@@ -27,25 +24,18 @@ class MatrixBase(RelativeLayout):
     # attributes of the last-touched fundmatrix notepoint
     last_fund_factors_dict = {'octaves': 0, 'fifths': 0, 'thirds': 0}
     last_fund_tonality = None
-    last_fund_ratio = None
+    last_fund_ratio = 1
 
     # variables used in making next notepoints, next octaves
     ratios_set, first_octave_set, next_octave_set = set(), set(), set()
-    relations_multiplier = {
-        'octaves_up':   2,
-        'octaves_down': 0.5,
-        'thirds_up':    1.25,
-        'thirds_down':  0.8,
-        'fifths_up':    1.5,
-        'fifths_down':  2 / 3
-    }
+
     relations_mult_addx_addy = {
-        'octaves_up':   [2,       0,  100],
-        'octaves_down': [0.5,       0, -100],
-        'thirds_up':    [1.25,   -105,   33.3],
-        'thirds_down':  [0.8,     105,  -33.3],
-        'fifths_up':    [1.5,      38,   58.3],
-        'fifths_down':  [2 / 3, -38,  -58.3]
+        'octaves_up': [2, 0, 100],
+        'octaves_down': [0.5, 0, -100],
+        'thirds_up': [1.25, -105, 33.3],
+        'thirds_down': [0.8, 105, -33.3],
+        'fifths_up': [1.5, 38, 58.3],
+        'fifths_down': [2 / 3, -38, -58.3]
     }
 
     def __init__(self, **kwargs):
@@ -69,12 +59,13 @@ class MatrixBase(RelativeLayout):
             self.fund_settings[k] = v
         for k, v in settings.items('Melody'):
             self.melody_settings[k] = v
-        self.last_fund_tonality = self.general_settings['scale']
         self.key = self.general_settings['key']
+        self.last_fund_tonality = self.general_settings['scale']
         self.ratio = 1
 
-    def redraw_layout(self, **kwargs):
-        text = kwargs.get('text', self.key)
+    def redraw_layout(self, text):
+        if not text:
+            text = self.key
         self.clear_layout()
         self.make_first_notepoint(text)
         self.populate_first_octave()
@@ -82,15 +73,12 @@ class MatrixBase(RelativeLayout):
         self.add_lines()
 
     def clear_layout(self):
-
         for i in self.children:
             if i.sound:
                 i.sound.stop()
-
         for i in self.canvas.before.children:
             if i.__class__.__name__ in ('Line', 'Color'):
                 self.canvas.before.remove(i)
-
         self.clear_widgets()
         self.ratios_set, self.first_octave_set, self.next_octave_set = set(), set(), set()
 
@@ -100,12 +88,14 @@ class MatrixBase(RelativeLayout):
         Afterward, the *Matrix classes can build a network of NotePoints based on the
         attributes of the original NotePoint.
         """
-        a = NotePoint()
-        a.text = text
-        a.center = [200, 200]
-        a.ratio = 1
-        a.factors_dict = {'octaves': 0, 'fifths': 0, 'thirds': 0}
-        a.tonality = self.general_settings['scale']
+
+        notepoint_kwargs = {'text': text,
+                            'pos': [200, 200],
+                            'ratio': self.last_fund_ratio,
+                            'factors_dict': {'octaves': 0, 'fifths': 0, 'thirds': 0},
+                            'tonality': self.general_settings['scale'],
+                            }
+        a = NotePoint(**notepoint_kwargs)
         a.attach_label()
         self.add_widget(a)
 
@@ -123,7 +113,7 @@ class MatrixBase(RelativeLayout):
                 for n in range(int(settings_dict[relation])):
                     self.create_next_notepoint(relation)
 
-        elif self.general_settings['easymode'] == u'0' or self.__class__.__name__ == 'FundMatrix':
+        elif self.general_settings['easymode'] == '0' or self.__class__.__name__ == 'FundMatrix':
             if self.general_settings['scale'] == 'Major':
                 for relation in ['fifths_up', 'fifths_up', 'fifths_down', 'thirds_up']:
                     self.create_next_notepoint(relation)
@@ -134,7 +124,7 @@ class MatrixBase(RelativeLayout):
                 self.remove_bottom_third()
             self.set_tonality()
 
-        elif self.general_settings['easymode'] == u'1':
+        elif self.general_settings['easymode'] == '1':
             if self.last_fund_tonality == 'Major':
                 for relation in ['fifths_up', 'thirds_up']:
                     self.create_next_notepoint(relation)
@@ -152,7 +142,7 @@ class MatrixBase(RelativeLayout):
         distance away, unless one already exists in that position.
         """
 
-        multiplier = self.relations_multiplier[relation]
+        multiplier = self.relations_mult_addx_addy[relation][0]
 
         for notepoint in self.children:
             self.ratios_set.add(notepoint.ratio)
@@ -221,10 +211,10 @@ class MatrixBase(RelativeLayout):
         creates one there.
         """
 
-        self.temp_octave, self.next_octave_set = self.next_octave_set, set()
-        multiplier = self.relations_multiplier[relation]
+        temp_octave, self.next_octave_set = self.next_octave_set, set()
+        multiplier = self.relations_mult_addx_addy[relation][0]
 
-        for notepoint in self.temp_octave:
+        for notepoint in temp_octave:
             self.ratios_set.add(notepoint.ratio)
             if notepoint.ratio * multiplier not in self.ratios_set:
                 self.make_related_note(notepoint, relation)
@@ -256,22 +246,22 @@ class MatrixBase(RelativeLayout):
         """
         distance, direction = relation.split('_')
         multiplier, move_x, move_y = self.relations_mult_addx_addy[relation]
-
-        new_note = NotePoint()
-        new_note.center = self.assign_new_note_center(notepoint, move_x, move_y)
-        new_note.ratio = self.assign_new_note_ratio(notepoint, multiplier)
-        new_note.factors_dict = self.assign_new_note_factors_dict(notepoint, distance, direction)
-        new_note.text = self.assign_new_note_text(notepoint, relation)
-        new_note.tonality = self.assign_new_note_tonality(notepoint, distance)
+        notepoint_kwargs = {'text': self.assign_new_note_text(notepoint, relation),
+                            'pos': self.assign_new_note_position(notepoint, move_x, move_y),
+                            'ratio': self.assign_new_note_ratio(notepoint, multiplier),
+                            'factors_dict': self.assign_new_note_factors_dict(notepoint, distance, direction),
+                            'tonality': self.assign_new_note_tonality(notepoint, distance),
+                            }
+        new_note = NotePoint(**notepoint_kwargs)
         self.add_widget(new_note)
         new_note.attach_label()
         self.register_new_note(new_note, distance)
 
     @staticmethod
-    def assign_new_note_center(notepoint, move_x, move_y):
-        new_center = [notepoint.center_x + move_x,
-                      notepoint.center_y + move_y]
-        return new_center
+    def assign_new_note_position(notepoint, move_x, move_y):
+        new_pos = [notepoint.x + move_x,
+                   notepoint.y + move_y]
+        return new_pos
 
     @staticmethod
     def assign_new_note_ratio(notepoint, multiplier):
@@ -301,8 +291,8 @@ class MatrixBase(RelativeLayout):
         original_text_index = full_scale.index(notepoint.text)
         shift_by = relations_steps[relation]
         adjusted_note_index = original_text_index + shift_by
-        adjusted_note_index = adjusted_note_index % 12
-        return full_scale[adjusted_note_index]
+        modulo_note_index = adjusted_note_index % 12
+        return full_scale[modulo_note_index]
 
     @staticmethod
     def assign_new_note_tonality(self, distance):

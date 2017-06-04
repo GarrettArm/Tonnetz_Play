@@ -1,6 +1,3 @@
-# File name: notepoint.py
-# -*- coding: utf-8 -*-
-
 from kivy.animation import Animation
 from kivy.app import App
 from kivy.core.audio import SoundLoader
@@ -10,31 +7,25 @@ from kivy.uix.widget import Widget
 
 class NotePointLabel(Label):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class NotePoint(Widget):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
+        self.text = kwargs.pop('text')
+        self.pos = kwargs.pop('pos')
+        self.ratio = kwargs.pop('ratio')
+        self.factors_dict = kwargs.pop('factors_dict')
+        self.tonality = kwargs.pop('tonality')
         self.pressed = False
-        self.size = [20, 20]
+        self.size_hint = [None, None]
+        self.size = [50, 50]
         self.color = [0.586, 0.45, 0.265, .9]
-        self.tonality = None
         self.sound = None
-        self.ratio = None
-        super().__init__(*args, **kwargs)
-
-    full_scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-
-    relations_mult_movex_movey = {
-        'octaves_up': [2.0, 0, 100],
-        'octaves_down': [0.5, 0, -100],
-        'thirds_up': [1.25, -105, 33.3],
-        'thirds_down': [0.8, 105, -33.3],
-        'fifths_up': [1.5, 38, 58.3],
-        'fifths_down': [2.0 / 3, -38, -58.3]
-    }
+        self.reference_to_melodymatrix = None
+        super().__init__(**kwargs)
 
     def on_touch_up(self, touch):
         if self.collide_point(*touch.pos):
@@ -59,9 +50,10 @@ class NotePoint(Widget):
         return super().on_touch_move(touch)
 
     def on_fund_notepoint_touch(self):
-        melodymatrix = self.find_melodymatrix()
-        melodymatrix.update_globals_from_last_fund_notepoint(self)
-        melodymatrix.redraw_layout(text=self.text)
+        if not self.reference_to_melodymatrix:
+            self.reference_to_melodymatrix = self.find_melodymatrix()
+        self.reference_to_melodymatrix.update_globals_from_last_fund_notepoint(self)
+        self.reference_to_melodymatrix.redraw_layout(text=self.text)
         self.animate()
 
     def find_melodymatrix(self):
@@ -82,12 +74,12 @@ class NotePoint(Widget):
     def animate(self):
         if not self.pressed:
             self.pressed = True
-            self.out_pos = [self.center_x - 2, self.center_y - 2]
-            self.home_pos = [self.x, self.y]
-            anim_in = Animation(center=self.out_pos, color=(0, 0, 0, 1),
-                                size=(self.size[0] * 1.25, self.size[1] * 1.25), d=0.02)
-            anim_out = Animation(pos=self.home_pos, color=self.color,
-                                 size=(self.size[0], self.size[1]), d=0.02)
+            out_pos = [self.center_x - 2, self.center_y - 2]
+            home_pos = [self.x, self.y]
+            anim_in = Animation(center=out_pos, color=(0, 0, 0, 1),
+                                size=(self.size[0] * 1.25, self.size[1] * 1.25), d=0.03)
+            anim_out = Animation(pos=home_pos, color=self.color,
+                                 size=(self.size[0], self.size[1]), d=0.03)
             anim = anim_in + anim_out
             anim.bind(on_complete=self.reset_anim)
             anim.start(self)
@@ -96,50 +88,11 @@ class NotePoint(Widget):
         self.pressed = False
 
     def play_sound(self):
-        filename = self.convert_factors_to_filename()
-        path_filename_extension = 'wavs/{}.wav'.format(filename)
-        self.sound = SoundLoader.load(path_filename_extension)
-        self.sound.loop = True
+        if not self.sound:
+            self.sound = SoundLoader.load('ogg/A4.ogg')
+            self.sound.loop = True
+            self.sound.pitch = self.ratio
         self.sound.play()
-
-    def convert_factors_to_filename(self):
-        octave, note_position = self.sum_all_factors()
-        octave = self.clamp(2, octave, 8)
-        return '{}{}'.format(self.full_scale[note_position], octave)
-
-    def sum_all_factors(self):
-        # key in the musical sense (i.e., C#, A, etc.)
-        # index in the normal sense of position within a list
-        musical_key = self.parent.general_settings['key']
-        index_of_key = self.full_scale.index(musical_key)
-        index_of_middle_C = 48          # 4 octaves, note 0
-        summed_factors_dict = self.add_two_dicts_values(
-            self.factors_dict, self.parent.last_fund_factors_dict)
-        sum_of_all_factors = (
-            index_of_key +
-            index_of_middle_C +
-            self.adjustment_for_relation(summed_factors_dict, 'octaves', 12) +
-            self.adjustment_for_relation(summed_factors_dict, 'fifths', 7) +
-            self.adjustment_for_relation(summed_factors_dict, 'thirds', 4)
-        )
-        return divmod(sum_of_all_factors, 12)
-
-    @staticmethod
-    def add_two_dicts_values(dict_a, dict_b):
-        try:
-            assert set(dict_a) == set(dict_b)
-            return {k: dict_a[k] + dict_b[k] for k in dict_a}
-        except AssertionError:
-            'Arguments dict_a and dict_b should have the same keys.'
-
-    @staticmethod
-    def adjustment_for_relation(summed_factors_dict, relation, step):
-        # (summed_factors_dict['octaves'] == 2) * 12 returns the integer 24.
-        return summed_factors_dict[relation] * step
-
-    @staticmethod
-    def clamp(low, value, high):
-        return min(max(low, value), high)
 
     def attach_label(self):
         label = NotePointLabel()

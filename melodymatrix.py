@@ -1,6 +1,3 @@
-# File name: melodymatrix.py
-# -*- coding: utf-8 -*-
-
 from matrixbase import MatrixBase
 
 

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import kivy
 from kivy.app import App
 from kivy.uix.relativelayout import RelativeLayout
 
-from settingsjson import general_settings_json
+from melodyscatter import MelodyScatter
+from melodymatrix import MelodyMatrix
+from fundscatterplane import FundScatterPlane
+from fundmatrix import FundMatrix
 from startscreen import StartScreen
+from settingsjson import general_settings_json
+
 
 kivy.require('1.10.0')
 
@@ -75,7 +79,10 @@ class TonnetzPlayApp(App):
         for instance in self.root.walk(loopback=True):
             if instance.__class__.__name__ in ('FundMatrix', 'MelodyMatrix'):
                 instance.get_config_variables()
-                instance.redraw_layout()
+                text = None
+                if key == 'key':    # we only want to pass a value if the changed key was "key" -- the musical sense.
+                    text = value
+                instance.redraw_layout(text)
 
 
 '''

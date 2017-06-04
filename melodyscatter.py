@@ -1,6 +1,3 @@
-# File name: melodyscatter.py
-# -*- coding: utf-8 -*-
-
 from kivy.uix.scatter import Scatter
 
 

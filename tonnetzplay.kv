@@ -1,5 +1,3 @@
-# File name: tonnetzplay.kv
-
 #
 # TonnetzPlay
 # 
@@ -84,7 +82,8 @@
 		anchor_y: 'top'
 		BoxLayout:
 			pos: self.parent.pos
-			size_hint: .08, .05
+			size_hint: None, None
+			size: 60, 30
 			Button:
 				id: settingbutton
 				border: [0,0,0,0]
@@ -105,7 +104,8 @@
 		anchor_y: 'top'
 		BoxLayout:
 			pos: self.parent.pos
-			size_hint: .08, .05
+			size_hint: None, None
+			size: 60, 30
 			Button:
 				id: silencebutton
 				border: [0,0,0,0]
@@ -135,7 +135,7 @@
 			size: self.size
 			on_touch_down: self.on_touch_down
 			on_touch_up: self.on_touch_up
-	NotePointLabel:
+	# NotePointLabel:
 
 <StartScreen>:
 	id: startscreen
