@@ -12,13 +12,14 @@ class NotePointLabel(Label):
 
 
 class NotePoint(Widget):
-
     def __init__(self, **kwargs):
         self.text = kwargs.pop('text')
         self.pos = kwargs.pop('pos')
         self.ratio = kwargs.pop('ratio')
         self.factors_dict = kwargs.pop('factors_dict')
         self.tonality = kwargs.pop('tonality')
+        self.wav_offset_factor = kwargs.pop('wav_offset_factor')
+        self.fundmatrix_multiplier = kwargs.pop('fund_multiplier')
         self.pressed = False
         self.size_hint = [None, None]
         self.size = [50, 50]
@@ -53,7 +54,7 @@ class NotePoint(Widget):
         if not self.reference_to_melodymatrix:
             self.reference_to_melodymatrix = self.find_melodymatrix()
         self.reference_to_melodymatrix.update_globals_from_last_fund_notepoint(self)
-        self.reference_to_melodymatrix.redraw_layout(text=self.text)
+        self.reference_to_melodymatrix.redraw_layout(key=self.text)
         self.animate()
 
     def find_melodymatrix(self):
@@ -89,9 +90,11 @@ class NotePoint(Widget):
 
     def play_sound(self):
         if not self.sound:
-            self.sound = SoundLoader.load('ogg/A4.ogg')
+            self.sound = SoundLoader.load('wavs/440Hz_44100Hz_16bit_30sec.wav')
             self.sound.loop = True
-            self.sound.pitch = self.ratio
+            self.sound.volume = 0.5
+            pitch = float(self.ratio * self.wav_offset_factor * self.fundmatrix_multiplier)
+            self.sound.pitch = pitch
         self.sound.play()
 
     def attach_label(self):

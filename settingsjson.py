@@ -27,7 +27,8 @@ general_settings_json = json.dumps([
 
     {'type': 'options',
      'title': 'Octaves Up',
-     'desc': 'Major Scale is 1 Octave up, 1 Octave down, 2 Fifths up, 1 Fifth down, and 1 Third up.\nMinor Scale is 1 Octave up, 1 Octave down, 1 Fifth up, 2 Fifths down, and 1 Third down ',
+     'desc': 'Major Scale is 1 Octave up, 1 Octave down, 2 Fifths up, 1 Fifth down, and 1 Third up.\n'
+             'Minor Scale is 1 Octave up, 1 Octave down, 1 Fifth up, 2 Fifths down, and 1 Third down ',
      'section': 'Fundamental',
      'key': 'octaves_up',
      'options': ['0', '1', '2', '3', '4', '5']},

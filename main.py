@@ -64,7 +64,6 @@ class TonnetzPlayApp(App):
             'easymode': '1',
         })
 
-
     def build_settings(self, settings):
         """
         kivy builtin that imports settings from a json file
@@ -79,14 +78,14 @@ class TonnetzPlayApp(App):
         for instance in self.root.walk(loopback=True):
             if instance.__class__.__name__ in ('FundMatrix', 'MelodyMatrix'):
                 instance.get_config_variables()
-                text = None
+                musical_key = None
                 if key == 'key':    # we only want to pass a value if the changed key was "key" -- the musical sense.
-                    text = value
-                instance.redraw_layout(text)
+                    musical_key = value
+                instance.redraw_layout(musical_key)
 
 
 '''
-This is an explanation of kivy for those not familiar.
+This is an explanation of kivy.
 In kivy, classes are initially instantiated based on the structure of the *.kv file.
 To inspect how the other classes in this program relate, pay attention to the indentations of the
 .kv file.

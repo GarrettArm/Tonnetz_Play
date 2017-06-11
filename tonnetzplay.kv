@@ -25,10 +25,9 @@
 <RootWidget>:
 	canvas.before:
 		Rectangle:
-			source: 'images/woodgrain.jpg'
+			# source: 'images/woodgrain.jpg'
 			pos: self.pos
 			size: self.size
-
 	SplitPanes:
 		orientation: 'horizontal'
 		NoteMatrixFundFloat:
@@ -76,7 +75,6 @@
 							do_translation: True
 							MelodyMatrix:
 								id: melodymatrix
-
 	AnchorLayout:
 		anchor_x: 'left'
 		anchor_y: 'top'
@@ -98,7 +96,6 @@
 				background_normal: 'images/question_mark.png'
 				background_down: 'images/question_mark.png'
 				on_release: root.open_startscreen()
-
 	AnchorLayout:
 		anchor_x: 'right'
 		anchor_y: 'top'
@@ -121,9 +118,7 @@
 				background_down: 'images/lock_closed.png'
 				on_release: melodyscatter.lock(self.state)
 				on_release: fundscatterplane.lock(self.state)
-
 	StartScreen:
-
 
 <NotePoint>:
 	canvas:
@@ -143,7 +138,6 @@
 	auto_dismiss: False
 	title: 'TonnetzPlay'
 	on_touch_down: self.parent.parent.on_touch_down
-
 	Label:
 		text_size: self.size
 		halign: 'left'

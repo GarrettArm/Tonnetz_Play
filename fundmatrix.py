@@ -1,3 +1,5 @@
+from fractions import Fraction
+
 from matrixbase import MatrixBase
 
 
@@ -18,21 +20,16 @@ class FundMatrix(MatrixBase):
         Assigns each FundMatrix NotePoint (self.child) a tonality (Maj or Min), so that when
         we rebuild the MelodyMatrix it will be a Maj or Min chord.
         """
-
-        fourth = 2 / 3
-        sixth = round(5 / 6, 3)
-        min_third = round(6 / 5, 3)
-
         if self.general_settings['scale'] == 'Major':
             for child in self.children:
-                if child.ratio in {1, 1.5, fourth}:
+                if child.ratio in {Fraction(1, 1), Fraction(3, 2), Fraction(2, 3)}:
                     child.tonality = 'Major'
-                elif round(child.ratio, 3) in {2.25, 1.25, 1.875, sixth}:
+                elif child.ratio in {Fraction(9, 8), Fraction(5, 4), Fraction(15, 8), Fraction(5, 6)}:
                     child.tonality = 'Minor'
 
         elif self.general_settings['scale'] == 'Minor':
             for child in self.children:
-                if child.ratio in {1, 1.5, fourth, 2.25}:
+                if child.ratio in {Fraction(1, 1), Fraction(3, 2), Fraction(2, 3), Fraction(9, 4)}:
                     child.tonality = 'Minor'
-                elif round(child.ratio, 3) in {0.8, min_third, 1.8}:
+                elif child.ratio in {Fraction(9, 8), Fraction(6, 5), Fraction(4, 5)}:
                     child.tonality = 'Major'
